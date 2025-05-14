@@ -12,8 +12,8 @@ class Condition(Enum):
 
 class Item:
     def __init__(self, type:str, name:str, bought_price:float,quanity:int=1, condition:Condition = Condition.NULL, stattrack:bool = False, username:str = None, date:datetime = None):
-        self.type = type.lower()
-        self.name = name.lower()
+        self.type = type.upper()
+        self.name = name.upper()
         self.bought_price = bought_price
         self.quantity = quanity
         self.condition = condition
@@ -25,7 +25,12 @@ class Item:
 
     def get_full_item_name(self):
         ##create full name: "sticker | parris 2025" or "statrack ak47 | anubis"
-        pass
+        if self.stattrack:
+            return f"Stattrack {self.type} | {self.name}"
+        elif self.type == "CASE":
+            return f"{self.name} {self.type}"
+        return f"{self.type} | {self.name}"
+
 
     def get_total_value(self):
         ##return quantity * bought price format float
