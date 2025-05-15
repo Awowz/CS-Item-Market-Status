@@ -30,6 +30,13 @@ class Item:
         elif self.type == "CASE":
             return f"{self.name} {self.type}"
         return f"{self.type} | {self.name}"
+    
+
+    def get_item_str_index(self):
+        buffer = f"{self.get_full_item_name()} | {self.get_condition_str()}"
+        if self.username == None:
+            return buffer
+        return f"{self.username} | {buffer}"
 
 
     def get_total_value(self):
@@ -40,6 +47,19 @@ class Item:
         ##add or subtrack amount, cannot be negative, or zero
         pass
     
-    def get_condition(self):
-        ##return string of condition, None of null
-        pass
+    def get_condition_str(self):
+        match self.condition:
+            case Condition.NULL:
+                return "NONE"
+            case Condition.BATTLE_SCARRED:
+                return "BATTLE SCARRED"
+            case Condition.WELL_WORN:
+                return "WELL WORN"
+            case Condition.FIELD_TESTED:
+                return "FIELD TESTED"
+            case Condition.MINIMAL_WEAR:
+                return "MINIMAL_WEAR"
+            case Condition.FACTORY_NEW:
+                return "FACTORY NEW"
+            case _:
+                return ""
