@@ -52,14 +52,14 @@ class Item:
             case Condition.NULL:
                 return "NONE"
             case Condition.BATTLE_SCARRED:
-                return "BATTLE SCARRED"
+                return "BATTLE_SCARRED"
             case Condition.WELL_WORN:
-                return "WELL WORN"
+                return "WELL_WORN"
             case Condition.FIELD_TESTED:
-                return "FIELD TESTED"
+                return "FIELD_TESTED"
             case Condition.MINIMAL_WEAR:
                 return "MINIMAL_WEAR"
             case Condition.FACTORY_NEW:
-                return "FACTORY NEW"
+                return "FACTORY_NEW"
             case _:
                 return ""
