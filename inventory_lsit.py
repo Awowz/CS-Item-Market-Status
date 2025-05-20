@@ -51,10 +51,17 @@ class Inventory_List:
 '''
         self.sql_inventory.execute(query)
         self.sql_connection.commit()
+        
+        self.add_history_to_item(item)
 
-    def add_history_to_item_id(self, item_id):
-        ##adds item to history table
-        pass
+    def add_history_to_item(self, item:Item):
+        item_id = self.__get_inventory_id(item)
+        for x in range(item.quantity):
+            query = f'''INSERT INTO {SQL_PURCHASE_HISTORY_TABLE_NAME}({SQL_PURCHASE_HISTORY_PRICE}, {SQL_PURCHASE_HISTORY_DATE}, {SQL_PURCHASE_HISTORY_FOREIGN_INVENTORY_ID})
+            VALUES('{item.bought_price}', '{item.date}', '{item_id}');
+            '''
+            self.sql_inventory.execute(query)
+            self.sql_connection.commit()
 
     def __does_inventory_entry_exist(self, item):
         ##check if item is already in inventory table return true if true. alse otherwise
@@ -71,6 +78,11 @@ class Inventory_List:
         buffer = self.sql_inventory.execute(query).fetchall()
         print(buffer)
 
+    def display_whole_history(self):
+        query = f"SELECT * FROM {SQL_PURCHASE_HISTORY_TABLE_NAME}"
+        buffer = self.sql_inventory.execute(query).fetchall()
+        print(buffer)
+
     def __get_inventory_id(self, item:Item):
         query = f'''SELECT {SQL_INVENTORY_INDEX} FROM {SQL_INVENTORY_TABLE_NAME}
         WHERE {SQL_INVENTORY_USERNAME} == '{item.username}' AND 
@@ -84,4 +96,5 @@ class Inventory_List:
         return buffer[0][0]
 
     def import_from_google_sheets(self):
+        ##scrape from a provided link all of the entries. add them to the DB,
         pass
