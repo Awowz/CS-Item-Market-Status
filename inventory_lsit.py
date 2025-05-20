@@ -44,15 +44,20 @@ class Inventory_List:
         REFERENCES {SQL_INVENTORY_TABLE_NAME}({SQL_INVENTORY_INDEX})
         );'''
         self.sql_inventory.execute(query).fetchall()
-        
+    
+    def add_item_and_history(self, item:Item):
+        self.add_item(item)
+        self.add_history_to_item(item)
+
     def add_item(self, item:Item):
+        if self.__does_inventory_entry_exist(item):
+            return
         query = f'''INSERT INTO {SQL_INVENTORY_TABLE_NAME}({SQL_INVENTORY_ITEM_TYPE}, {SQL_INVENTORY_ITEM_NAME}, {SQL_INVENTORY_CONDITION}, {SQL_INVENTORY_STATTRACK}, {SQL_INVENTORY_USERNAME})
         VALUES('{item.type}', '{item.name}', '{item.get_condition_str()}', {item.stattrack}, '{item.username}');
 '''
         self.sql_inventory.execute(query)
         self.sql_connection.commit()
         
-        self.add_history_to_item(item)
 
     def add_history_to_item(self, item:Item):
         item_id = self.__get_inventory_id(item)
@@ -64,9 +69,12 @@ class Inventory_List:
             self.sql_connection.commit()
 
     def __does_inventory_entry_exist(self, item):
-        ##check if item is already in inventory table return true if true. alse otherwise
-        #add this to add_item to avoid duplicate entries, still follow through with history entiry
-        pass
+        try:
+            self.__get_inventory_id(item)
+            return True
+        except Exception as e:
+            print(e)
+        return False
 
     def display_table_columns(self):
         query = f"PRAGMA TABLE_INFO('{SQL_INVENTORY_TABLE_NAME}');"
