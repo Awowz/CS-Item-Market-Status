@@ -91,6 +91,10 @@ class Inventory_List:
         buffer = self.sql_inventory.execute(query).fetchall()
         print(buffer)
 
+    def display_item_history(self, item:Item):
+        #select all history entries related to item id. print
+        pass
+
     def __get_inventory_id(self, item:Item):
         query = f'''SELECT {SQL_INVENTORY_INDEX} FROM {SQL_INVENTORY_TABLE_NAME}
         WHERE {SQL_INVENTORY_USERNAME} == '{item.username}' AND 
@@ -102,7 +106,17 @@ class Inventory_List:
         if buffer == []:
             raise Exception("item currently does not exist in inventory.db")
         return buffer[0][0]
+    
+    def get_numb_of_item_related_history(self, item:Item):
+        #sum total of history entries that are related to item id
+        pass
+
+    def get_total_spent(self, item:Item):
+        #get sum of all entries related to item ID
+        pass
+
 
     def import_from_google_sheets(self):
         ##scrape from a provided link all of the entries. add them to the DB,
         pass
+
