@@ -92,8 +92,10 @@ class Inventory_List:
         print(buffer)
 
     def display_item_history(self, item:Item):
-        #select all history entries related to item id. print
-        pass
+        item_id = self.__get_inventory_id(item)
+        query = f"SELECT * FROM {SQL_PURCHASE_HISTORY_TABLE_NAME} WHERE {SQL_PURCHASE_HISTORY_FOREIGN_INVENTORY_ID} == '{item_id}'"
+        buffer = self.sql_inventory.execute(query).fetchall()
+        print(buffer)
 
     def __get_inventory_id(self, item:Item):
         query = f'''SELECT {SQL_INVENTORY_INDEX} FROM {SQL_INVENTORY_TABLE_NAME}
