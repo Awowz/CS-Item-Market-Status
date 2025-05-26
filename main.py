@@ -5,8 +5,17 @@ class System_State(Enum):
     MAIN_MENU = 0
     ADD_ITEM_OVERVIEW = 1
     INVENTORY_ITEM_OVERVIEW = 2
+    VIEW_BUFFER_OUTPUT = 3
 
-def display(current_state, users_input):
+class App_Container():
+    def __init__(self):
+        self.inventory = Inventory_List()
+        self.buffer_output = ""
+
+    
+        
+
+def display(current_state, users_input, app_container):
     match current_state:
 
         case System_State.MAIN_MENU:
@@ -26,6 +35,9 @@ def display(current_state, users_input):
 2. Get items from user
 3. Get Purchase history from item''')
 
+        case System_State.VIEW_BUFFER_OUTPUT:
+            print("....")
+            print(app_container.buffer_output)
 
         case _:
             raise Exception("unkown state condition raised")
@@ -34,7 +46,7 @@ def display(current_state, users_input):
 
 
 
-def reaction(current_state, users_input):
+def reaction(current_state, users_input, app_container):
     if users_input == 'q':
         exit()
     elif users_input == 'x':
@@ -55,8 +67,20 @@ def reaction(current_state, users_input):
             if users_input == '1':
                 pass
             elif users_input == '2':
-                create_item()
+                create_item(app_container)
                 return System_State.ADD_ITEM_OVERVIEW
+            
+        case System_State.INVENTORY_ITEM_OVERVIEW:
+            if users_input =='1':
+                app_container.buffer_output = app_container.inventory.get_whole_inventory()
+                return System_State.VIEW_BUFFER_OUTPUT
+            elif users_input == '2':
+                pass
+            elif users_input == '3':
+                pass
+
+        case System_State.VIEW_BUFFER_OUTPUT:
+            pass
 
         case _:
             raise Exception("unkown state contition raised in reaction")
@@ -66,7 +90,7 @@ def reaction(current_state, users_input):
 def clear():
     os.system('clr' if os.name == 'nt' else 'clear')
 
-def create_item():
+def create_item(app_container):
     clear()
     print("Enter item type, for example: AK47, CASE, STICKER.....")
     user_type = input()
@@ -107,6 +131,7 @@ def create_item():
                     break
                 case 6:
                     user_condition = Condition.FACTORY_NEW
+                    break
         except:
             pass
     print("please enter the price that you bought the item at ex: 42.93 , 0.03")
@@ -134,30 +159,19 @@ def create_item():
     if user_name == "":
         user_name = None
     generated_item = Item(user_type, user_item_name, user_price, user_quantity, user_condition, user_stattrack, user_name)
-    global inventory
-    inventory.add_item_and_history(generated_item)
+    app_container.inventory.add_item_and_history(generated_item)
 
 
 def main():
     current_state = System_State.MAIN_MENU
     users_input = ""
+    app_container = App_Container()
     clear()
     while True:
-        display(current_state, users_input)
+        display(current_state, users_input, app_container)
         users_input = input()
-        current_state = reaction(current_state, users_input)
+        current_state = reaction(current_state, users_input, app_container)
         clear()
 
-inventory = Inventory_List()
+
 main()
-
-'''
-inventory = Inventory_List()
-
-item = Item("Ak-47", "Python Skin", 6.79, quanity=2, condition=Condition.BATTLE_SCARRED, username="tester1")
-
-inventory.add_item_and_history(item)
-
-inventory.display_whole_inventory()
-inventory.display_whole_history()
-'''
