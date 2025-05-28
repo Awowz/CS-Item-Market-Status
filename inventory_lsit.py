@@ -109,13 +109,18 @@ class Inventory_List:
             raise Exception("item currently does not exist in inventory.db")
         return buffer[0][0]
     
-    def get_usernames_in_inventory(self): #-> list[str]:
+    def get_usernames_in_inventory(self) -> list[str]:
         query = f'''SELECT {SQL_INVENTORY_USERNAME} FROM {SQL_INVENTORY_TABLE_NAME} GROUP BY {SQL_INVENTORY_USERNAME}'''
         buffer = self.sql_inventory.execute(query).fetchall()
         list_of_users = []
         for x in range(len(buffer)):
             list_of_users.append(buffer[x][0].upper())
         return list_of_users
+    
+    def get_users_inventory(self, username:str):
+        query = f"SELECT * FROM {SQL_INVENTORY_TABLE_NAME} WHERE {SQL_INVENTORY_USERNAME} == '{username}'"
+        buffer = self.sql_inventory.execute(query).fetchall()
+        return buffer
     
     def get_numb_of_item_related_history(self, item:Item):
         #sum total of history entries that are related to item id

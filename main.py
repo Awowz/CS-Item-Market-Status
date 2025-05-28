@@ -6,6 +6,7 @@ class System_State(Enum):
     ADD_ITEM_OVERVIEW = 1
     INVENTORY_ITEM_OVERVIEW = 2
     VIEW_BUFFER_OUTPUT = 3
+    DISPLAY_USERS_INTO_INVENTORY = 4
 
 class App_Container():
     def __init__(self):
@@ -36,8 +37,12 @@ def display(current_state, users_input, app_container):
 3. Get Purchase history from item''')
 
         case System_State.VIEW_BUFFER_OUTPUT:
-            print("....")
             print(app_container.buffer_output)
+
+        case System_State.DISPLAY_USERS_INTO_INVENTORY:
+            all_users = app_container.inventory.get_usernames_in_inventory()
+            for x in range(len(all_users)):
+                print(f"{x}. {all_users[x]}")
 
         case _:
             raise Exception("unkown state condition raised")
@@ -75,12 +80,21 @@ def reaction(current_state, users_input, app_container):
                 app_container.buffer_output = app_container.inventory.get_whole_inventory()
                 return System_State.VIEW_BUFFER_OUTPUT
             elif users_input == '2':
-                pass
+                return System_State.DISPLAY_USERS_INTO_INVENTORY
             elif users_input == '3':
                 pass
 
         case System_State.VIEW_BUFFER_OUTPUT:
             pass
+
+        case System_State.DISPLAY_USERS_INTO_INVENTORY:
+            
+            input_int = int(users_input)
+            user_list = app_container.inventory.get_usernames_in_inventory()
+            if input_int >= 0 and input_int < len(user_list):
+                app_container.buffer_output = app_container.inventory.get_users_inventory(user_list[input_int])
+                return System_State.VIEW_BUFFER_OUTPUT
+            
 
         case _:
             raise Exception("unkown state contition raised in reaction")
