@@ -45,6 +45,9 @@ class Item:
         ##return quantity * bought price format float
         pass
 
+    def construct_string(self):
+        pass
+
     def add_quanity(self, value):
         ##add or subtrack amount, cannot be negative, or zero
         pass

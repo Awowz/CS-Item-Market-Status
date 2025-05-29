@@ -135,3 +135,5 @@ class Inventory_List:
         ##scrape from a provided link all of the entries. add them to the DB,
         pass
 
+    def get_list_items(self) ->Item:
+        pass
