@@ -135,5 +135,7 @@ class Inventory_List:
         ##scrape from a provided link all of the entries. add them to the DB,
         pass
 
-    def get_list_items(self) ->Item:
-        pass
+    def get_list_items(self) ->list[Item]:
+        query = f"SELECT * FROM {SQL_INVENTORY_TABLE_NAME}"
+        buffer = self.sql_inventory.execute(query).fetchall()
+        return buffer

@@ -1,4 +1,5 @@
 from inventory_lsit import *
+from steam_market_scraper import *
 import os
 
 class System_State(Enum):
