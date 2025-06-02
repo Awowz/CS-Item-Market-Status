@@ -1,5 +1,6 @@
 import datetime
 from enum import Enum
+from constants import *
 
 class Condition(Enum):
     NULL = 0
@@ -46,7 +47,28 @@ class Item:
         pass
 
     def construct_string(self):
-        pass
+        if self.type is "CASE" or self.type is "KEY":
+            return self.__get_case_key_string()
+        elif self.type is "KNIFE" or self.type is "GLOVE":
+            return self.__get_glove_kinfe_string()
+        else:
+            return self.__get_weapon_string()
+
+    def __get_glove_kinfe_string(self):
+        return f"{STAR}{self.__get_weapon_string()}"
+
+    def __get_weapon_string(self):
+        buffer = ""
+        if self.stattrack:
+            buffer += f" {STATTRACK}"
+        buffer +=f" {self.type} | {self.name} ({self.get_condition_str()})"#TODO change condition TEXT
+        return buffer
+
+    def __get_case_key_string(self):
+        buffer = ""
+        buffer += f"{self.name} {self.type}"
+        return buffer
+
 
     def add_quanity(self, value):
         ##add or subtrack amount, cannot be negative, or zero

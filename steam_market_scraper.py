@@ -33,3 +33,10 @@ class Steam_Market_Scraper():
 
     def test(self):
         print(self.__generate_market_hash_payload("testing"))
+        #r = requests.get('https://steamcommunity.com/market/listings/730/StatTrak%E2%84%A2%20AK-47%20%7C%20Legion%20of%20Anubis%20%28Well-Worn%29?filter=AK47&cc=us')
+        #print(r.text)
+        #print("\n\n\n")
+
+        #https://steamcommunity.com/market/priceoverview/?country=US&currency=3&appid=730&market_hash_name=AWP%20|%20Electric%20Hive%20(Factory%20New)
+
+        #https://stackoverflow.com/questions/22616644/steam-market-currency-and-xml-format
