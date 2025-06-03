@@ -14,8 +14,17 @@ class Steam_Market_Scraper():
     def construct_url_search(self, item:Item) ->str:
         pass
 
-    def __check_valid_listing(self):
-        pass
+    def __check_valid_listing(self, item:Item):
+        payload = self.__generate_market_hash_payload(item.construct_string())
+        r = requests.get(STEAM_MARKET_BASE_URL, params=payload)
+        response = r.json()
+        if response['success'] == False:
+            raise Exception("fatal flaw, steam api failed to GET info")
+        print(response['success'])
+        if STEAM_PRICE_KEY in response:
+            return response
+        else:
+            return None
 
     def __check_valid_search(self):
         pass
@@ -32,7 +41,9 @@ class Steam_Market_Scraper():
         pass
 
     def test(self):
-        print(self.__generate_market_hash_payload("testing"))
+        item = Item("Aug", "StoRM", 1, condition=Condition.FACTORY_NEW, username="tester1")
+        print(item.construct_string())
+        self.__check_valid_listing(item)
         #r = requests.get('https://steamcommunity.com/market/listings/730/StatTrak%E2%84%A2%20AK-47%20%7C%20Legion%20of%20Anubis%20%28Well-Worn%29?filter=AK47&cc=us')
         #print(r.text)
         #print("\n\n\n")

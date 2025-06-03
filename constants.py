@@ -2,6 +2,7 @@ SQL_FILE_NAME = "player_inv.db"
 
 STATTRACK = "StatTrak™"
 STAR = "★"
+STEAM_PRICE_KEY = "lowest_price"
 
 SQL_INVENTORY_TABLE_NAME = "INVENTORY"
 SQL_INVENTORY_INDEX = "ID"

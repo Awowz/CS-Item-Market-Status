@@ -14,7 +14,7 @@ class Condition(Enum):
 class Item:
     def __init__(self, type:str, name:str, bought_price:float,quanity:int=1, condition:Condition = Condition.NULL, stattrack:bool = False, username:str = ".", date:datetime = None):
         self.type = type.upper()
-        self.name = name.upper()
+        self.name = name.title()
         self.bought_price = bought_price
         self.quantity = quanity
         self.condition = condition
@@ -47,21 +47,21 @@ class Item:
         pass
 
     def construct_string(self):
-        if self.type is "CASE" or self.type is "KEY":
+        if self.type == "CASE" or self.type == "KEY":
             return self.__get_case_key_string()
-        elif self.type is "KNIFE" or self.type is "GLOVE":
+        elif "KNIFE" in self.type or self.type == "GLOVE":
             return self.__get_glove_kinfe_string()
         else:
             return self.__get_weapon_string()
 
     def __get_glove_kinfe_string(self):
-        return f"{STAR}{self.__get_weapon_string()}"
+        return f"{STAR} {self.__get_weapon_string()}"
 
     def __get_weapon_string(self):
         buffer = ""
         if self.stattrack:
-            buffer += f" {STATTRACK}"
-        buffer +=f" {self.type} | {self.name} ({self.get_condition_str()})"#TODO change condition TEXT
+            buffer += f"{STATTRACK} "
+        buffer +=f"{self.type} | {self.name} ({self.get_condition_str()})"#TODO change condition TEXT
         return buffer
 
     def __get_case_key_string(self):
@@ -79,14 +79,14 @@ class Item:
             case Condition.NULL:
                 return "NONE"
             case Condition.BATTLE_SCARRED:
-                return "BATTLE_SCARRED"
+                return "Battle-Scarred"
             case Condition.WELL_WORN:
-                return "WELL_WORN"
+                return "Well-Worn"
             case Condition.FIELD_TESTED:
-                return "FIELD_TESTED"
+                return "Field-Tested"
             case Condition.MINIMAL_WEAR:
-                return "MINIMAL_WEAR"
+                return "Minimal Wear"
             case Condition.FACTORY_NEW:
-                return "FACTORY_NEW"
+                return "Factory New"
             case _:
                 return ""
