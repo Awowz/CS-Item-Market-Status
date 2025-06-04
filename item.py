@@ -61,7 +61,7 @@ class Item:
         buffer = ""
         if self.stattrack:
             buffer += f"{STATTRACK} "
-        buffer +=f"{self.type} | {self.name} ({self.get_condition_str()})"#TODO change condition TEXT
+        buffer +=f"{self.type} | {self.name} ({self.get_condition_str()})"
         return buffer
 
     def __get_case_key_string(self):
@@ -90,3 +90,9 @@ class Item:
                 return "Factory New"
             case _:
                 return ""
+            
+    def set_item_name(self, name:str):
+        self.name = name
+
+    def set_item_type(self, type:str):
+        self.type = type

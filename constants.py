@@ -34,7 +34,15 @@ CURRENCY_VALUE = 1
 APPID_KEY = "appid"
 COUNTER_STRIKE_APP_ID = 730
 MARKET_HASH_KEY = "market_hash_name"
+START_KEY = "start"
+START_VALUE = 0
+COUNT_KEY = "count"
+COUNT_VALUE = 1
+LANGUAGE_KEY = "l"
+LANGUAGE_VALUE = "english"
+QUERY_SEARCH_KEY = "q"
 
 STEAM_MARKET_BASE_URL = "https://steamcommunity.com/market/priceoverview"
+STEAM_MARKET_SEARCH_URL = "https://steamcommunity.com/market/search"
 STEAM_SEARCH_URL = "search"
 STEAM_LIST_URL = "listings"

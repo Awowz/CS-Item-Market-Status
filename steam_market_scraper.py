@@ -1,11 +1,14 @@
 from constants import *
 from item import *
+from bs4 import BeautifulSoup
 
 import requests
 
 class Steam_Market_Scraper():
     def __init__(self):
         self.__payload = {COUNTRY_KEY:COUNTRY_VALUE, CURRENCY_KEY:CURRENCY_VALUE, APPID_KEY:COUNTER_STRIKE_APP_ID}
+        self.__search_payload = {START_KEY:START_VALUE, COUNT_KEY:COUNT_VALUE,LANGUAGE_KEY:LANGUAGE_VALUE,CURRENCY_KEY:CURRENCY_VALUE,APPID_KEY:COUNTER_STRIKE_APP_ID}
+        #?start=0&count=1&l=english&currency=1&appid=730&q=slate
         pass
 
     def construct_url_listing(self, item:Item) ->str:
@@ -26,16 +29,28 @@ class Steam_Market_Scraper():
         else:
             return None
 
-    def __check_valid_search(self):
-        pass
+    def __search_for_possible_name(self, item:Item) -> str:
+        payload = self.__generate_query_payload(item.construct_string())
+        r = requests.get(STEAM_MARKET_SEARCH_URL, params=payload)
+        soup = BeautifulSoup(r.content, 'html.parser')
+        val = soup.select_one("#result_0_name")
+        return val.text
 
     def __generate_market_hash_payload(self, hash:str) ->dict:
         payload = self.__payload
         payload[MARKET_HASH_KEY] = hash
         return payload
+    
+    def __generate_query_payload(self, query:str) ->dict:
+        payload = self.__search_payload
+        payload[QUERY_SEARCH_KEY] = query
+        return payload
 
     def get_item_value(self, item:Item) ->float:
-        #construct listing if valid, return value.
+        steam_response = self.__check_valid_listing(item)
+        if steam_response == None:
+            steam_response = self.__search_for_possible_name(item)
+
         #else construct search, if valid return value
         #if no results. return -1
         pass
@@ -43,7 +58,7 @@ class Steam_Market_Scraper():
     def test(self):
         item = Item("Aug", "StoRM", 1, condition=Condition.FACTORY_NEW, username="tester1")
         print(item.construct_string())
-        self.__check_valid_listing(item)
+        self.__search_for_possible_name(item)
         #r = requests.get('https://steamcommunity.com/market/listings/730/StatTrak%E2%84%A2%20AK-47%20%7C%20Legion%20of%20Anubis%20%28Well-Worn%29?filter=AK47&cc=us')
         #print(r.text)
         #print("\n\n\n")
