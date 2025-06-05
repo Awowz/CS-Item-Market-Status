@@ -25,6 +25,7 @@ class Item:
         self.date = date
         if date is None:
             self.date = datetime.datetime.now()
+        self.market_value = None
 
     def get_full_item_name(self):
         ##create full name: "sticker | parris 2025" or "statrack ak47 | anubis"
@@ -96,3 +97,6 @@ class Item:
 
     def set_item_type(self, type:str):
         self.type = type
+
+    def set_market_value(self, value):
+        self.market_value = value

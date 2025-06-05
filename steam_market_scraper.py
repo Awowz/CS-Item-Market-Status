@@ -23,17 +23,25 @@ class Steam_Market_Scraper():
         response = r.json()
         if response['success'] == False:
             raise Exception("fatal flaw, steam api failed to GET info")
-        print(response['success'])
         if STEAM_PRICE_KEY in response:
             return response
         else:
             return None
 
-    def __search_for_possible_name(self, item:Item) -> str:
-        payload = self.__generate_query_payload(item.construct_string())
-        r = requests.get(STEAM_MARKET_SEARCH_URL, params=payload)
+    def __retrieve_market_value(self, item:Item):
+        response = self.__check_valid_listing(item)
+        if response == None:
+            return None
+        return response[STEAM_PRICE_KEY]
+
+    def __search_for_possible_name(self, r:requests.Response) -> str:
         soup = BeautifulSoup(r.content, 'html.parser')
         val = soup.select_one("#result_0_name")
+        return val.text
+
+    def __search_for_price(self, r:requests.Response):
+        soup = BeautifulSoup(r.content, 'html.parser')
+        val = soup.select_one(".sale_price")
         return val.text
 
     def __generate_market_hash_payload(self, hash:str) ->dict:
@@ -46,19 +54,23 @@ class Steam_Market_Scraper():
         payload[QUERY_SEARCH_KEY] = query
         return payload
 
-    def get_item_value(self, item:Item) ->float:
-        steam_response = self.__check_valid_listing(item)
-        if steam_response == None:
-            steam_response = self.__search_for_possible_name(item)
-
-        #else construct search, if valid return value
-        #if no results. return -1
+    def get_item_value(self, item:Item) ->Item:
+        item_price = self.__retrieve_market_value(item)
+        if item_price == None:
+            payload = self.__generate_query_payload(item.construct_string())
+            r = requests.get(STEAM_MARKET_SEARCH_URL, params=payload)
+            possible_item_name = self.__search_for_possible_name(r)
+            item_price = self.__search_for_price(r)
+            print(f"could not find item {item.construct_string()}. search results returned: {possible_item_name}\nupdating entry")
+            #todo: update item fields into no object
+        #set price in new bject, return object.
+        print(item_price)
         pass
 
     def test(self):
-        item = Item("Aug", "StoRM", 1, condition=Condition.FACTORY_NEW, username="tester1")
+        item = Item("Aug", "StoRm", 1, condition=Condition.FACTORY_NEW, username="tester1")
         print(item.construct_string())
-        self.__search_for_possible_name(item)
+        self.get_item_value(item)
         #r = requests.get('https://steamcommunity.com/market/listings/730/StatTrak%E2%84%A2%20AK-47%20%7C%20Legion%20of%20Anubis%20%28Well-Worn%29?filter=AK47&cc=us')
         #print(r.text)
         #print("\n\n\n")
