@@ -62,7 +62,10 @@ class Item:
         buffer = ""
         if self.stattrack:
             buffer += f"{STATTRACK} "
-        buffer +=f"{self.type} | {self.name} ({self.get_condition_str()})"
+        if self.condition == Condition.NULL:
+            buffer +=f"{self.type} | {self.name}"
+        else:
+            buffer +=f"{self.type} | {self.name} ({self.get_condition_str()})"
         return buffer
 
     def __get_case_key_string(self):
