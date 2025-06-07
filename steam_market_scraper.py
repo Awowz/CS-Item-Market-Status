@@ -2,6 +2,7 @@ from constants import *
 from item import *
 from bs4 import BeautifulSoup
 
+import re
 import requests
 
 class Steam_Market_Scraper():
@@ -53,6 +54,15 @@ class Steam_Market_Scraper():
         payload = self.__search_payload
         payload[QUERY_SEARCH_KEY] = query
         return payload
+    
+    def __filter_out_for_name(self, text) -> str:
+        text = text.replace(f"{STAR} ", "")
+        text = text.replace(f"{STATTRACK} ")
+        for x in Condition:
+            text = text.replace(f" ({x})", "")
+        match_str = re.search("([^\|]+) \| (.+)", text)
+        #TODO SPLIT MATCH_STR WITH MATCH_STR.GROUP(0) / and and return sstuff
+        
 
     def get_item_value(self, item:Item) ->Item:
         item_price = self.__retrieve_market_value(item)
@@ -62,6 +72,8 @@ class Steam_Market_Scraper():
             possible_item_name = self.__search_for_possible_name(r)
             item_price = self.__search_for_price(r)
             print(f"could not find item {item.construct_string()}. search results returned: {possible_item_name}\nupdating entry")
+            possible_item_name = self.__filter_out_for_name(possible_item_name)
+            
             #todo: update item fields into no object
         #set price in new bject, return object.
         print(item_price)
