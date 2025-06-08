@@ -2,6 +2,7 @@ from inventory_lsit import *
 from steam_market_scraper import *
 import os
 
+#TODO pull from db all into an item array, then get prices for each of them. dont throw away this data, keep it pooled so that if more request are sent in the same session its not spamming server
 class System_State(Enum):
     MAIN_MENU = 0
     ADD_ITEM_OVERVIEW = 1

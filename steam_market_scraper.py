@@ -4,8 +4,7 @@ from bs4 import BeautifulSoup
 
 import re
 import requests
-#TODO CURRENCY filter out the currency so that it can be converted to a float
-
+#TODO set a time limit between item lookup and query
 class Steam_Market_Scraper():
     def __init__(self):
         self.__payload = {COUNTRY_KEY:COUNTRY_VALUE, CURRENCY_KEY:CURRENCY_VALUE, APPID_KEY:COUNTER_STRIKE_APP_ID}
@@ -28,17 +27,19 @@ class Steam_Market_Scraper():
         response = self.__check_valid_listing(item)
         if response == None:
             return None
-        return response[STEAM_PRICE_KEY]
+        return self.__filter_currency_to_float(response[STEAM_PRICE_KEY])
 
     def __search_for_possible_name(self, r:requests.Response) -> str:
         soup = BeautifulSoup(r.content, 'html.parser')
         val = soup.select_one("#result_0_name")
+        if val == None:
+            return None
         return val.text
 
     def __search_for_price(self, r:requests.Response):
         soup = BeautifulSoup(r.content, 'html.parser')
         val = soup.select_one(".sale_price")
-        return val.text
+        return self.__filter_currency_to_float(val.text)
 
     def __generate_market_hash_payload(self, hash:str) ->dict:
         payload = self.__payload
@@ -65,16 +66,31 @@ class Steam_Market_Scraper():
                 item_name = text.replace(x, "")
                 return (x, item_name)
         raise Exception("item is outside of the scope of this project")
-        
+    
+    def __filter_currency_to_float(self, string:str) ->float:
+        match_str = re.search("[^\\d]*([\\d\\,\\.]+)[^\\d]*", string)
+        raw = match_str.group(1)
+        if "," in raw and "." not in raw:
+            raw = raw.replace(",", ".")
+        else:
+            raw = raw.replace(",", "")
+        try:
+            value = float(raw)
+            return value
+        except ValueError:
+            print("This currency is not suppored and could not be converted")
+            return -1
+
     def __query_search_item(self, item:Item) -> Item:
         payload = self.__generate_query_payload(item.construct_string())
         r = requests.get(STEAM_MARKET_SEARCH_URL, params=payload)
         possible_item_name = self.__search_for_possible_name(r)
+        if possible_item_name == None:
+            raise Exception(f"No items have been found from item: {item.construct_string()}. please edit the item and correctly spell it")
         item_price = self.__search_for_price(r)
         if item_price == None:
             print("found an error")
             raise Exception(f"No items have been found from item: {item.construct_string()}. please edit the item and correctly spell it")
-        #TODO CURRENCY
         print(f"could not find item {item.construct_string()}. search results returned: {possible_item_name}\n")
         possible_item_correction = self.__filter_out_for_name(possible_item_name)
         item.set_item_type(possible_item_correction[0])
@@ -93,7 +109,7 @@ class Steam_Market_Scraper():
         return copied_item
 
     def test(self):
-        item = Item("aug", "storm", 1, condition=Condition.BATTLE_SCARRED, username="tester1")
+        item = Item("aug", "stormm", 1, condition=Condition.FACTORY_NEW, username="tester1")
         new_item = self.get_item_value(item)
         print(new_item.market_value)
         print(new_item.construct_string())
