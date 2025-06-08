@@ -46,3 +46,5 @@ STEAM_MARKET_BASE_URL = "https://steamcommunity.com/market/priceoverview"
 STEAM_MARKET_SEARCH_URL = "https://steamcommunity.com/market/search"
 STEAM_SEARCH_URL = "search"
 STEAM_LIST_URL = "listings"
+
+CS_UNIQUE_ITEMS = ["Case", "Pin", "Knife", "Key", "Pass"] #these items do not follow the standard str format

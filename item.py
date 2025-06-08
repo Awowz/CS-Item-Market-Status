@@ -48,7 +48,7 @@ class Item:
         pass
 
     def construct_string(self):
-        if self.type == "CASE" or self.type == "KEY":
+        if self.type.title() in CS_UNIQUE_ITEMS:
             return self.__get_case_key_string()
         elif "KNIFE" in self.type or self.type == "GLOVE":
             return self.__get_glove_kinfe_string()
@@ -70,7 +70,7 @@ class Item:
 
     def __get_case_key_string(self):
         buffer = ""
-        buffer += f"{self.name} {self.type}"
+        buffer += f"{self.name} {self.type.title()}"
         return buffer
 
 

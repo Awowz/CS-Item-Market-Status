@@ -4,21 +4,16 @@ from bs4 import BeautifulSoup
 
 import re
 import requests
+#TODO CURRENCY filter out the currency so that it can be converted to a float
 
 class Steam_Market_Scraper():
     def __init__(self):
         self.__payload = {COUNTRY_KEY:COUNTRY_VALUE, CURRENCY_KEY:CURRENCY_VALUE, APPID_KEY:COUNTER_STRIKE_APP_ID}
         self.__search_payload = {START_KEY:START_VALUE, COUNT_KEY:COUNT_VALUE,LANGUAGE_KEY:LANGUAGE_VALUE,CURRENCY_KEY:CURRENCY_VALUE,APPID_KEY:COUNTER_STRIKE_APP_ID}
-        #?start=0&count=1&l=english&currency=1&appid=730&q=slate
-        pass
-
-    def construct_url_listing(self, item:Item) ->str:
-        pass
-
-    def construct_url_search(self, item:Item) ->str:
-        pass
+        self.__all_conditions = ["Battle-Scarred","Well-Worn", "Field-Tested", "Minimal Wear", "Factory New"]
 
     def __check_valid_listing(self, item:Item):
+        print(f"Checking for item {item.construct_string()} on market...")
         payload = self.__generate_market_hash_payload(item.construct_string())
         r = requests.get(STEAM_MARKET_BASE_URL, params=payload)
         response = r.json()
@@ -55,34 +50,55 @@ class Steam_Market_Scraper():
         payload[QUERY_SEARCH_KEY] = query
         return payload
     
-    def __filter_out_for_name(self, text) -> str:
+    def __filter_out_for_name(self, text) -> tuple: ##returns (item type, item name)
         text = text.replace(f"{STAR} ", "")
-        text = text.replace(f"{STATTRACK} ")
-        for x in Condition:
+        text = text.replace(f"{STATTRACK} ", "")
+        for x in self.__all_conditions:
             text = text.replace(f" ({x})", "")
-        match_str = re.search("([^\|]+) \| (.+)", text)
-        #TODO SPLIT MATCH_STR WITH MATCH_STR.GROUP(0) / and and return sstuff
+        if "|" in text:
+            match_str = re.search("([^\\|]+) \\| (.+)", text)
+            item_type = match_str.group(1)
+            item_name = match_str.group(2)
+            return (item_type, item_name)
+        for x in CS_UNIQUE_ITEMS:
+            if x in text:
+                item_name = text.replace(x, "")
+                return (x, item_name)
+        raise Exception("item is outside of the scope of this project")
         
+    def __query_search_item(self, item:Item) -> Item:
+        payload = self.__generate_query_payload(item.construct_string())
+        r = requests.get(STEAM_MARKET_SEARCH_URL, params=payload)
+        possible_item_name = self.__search_for_possible_name(r)
+        item_price = self.__search_for_price(r)
+        if item_price == None:
+            print("found an error")
+            raise Exception(f"No items have been found from item: {item.construct_string()}. please edit the item and correctly spell it")
+        #TODO CURRENCY
+        print(f"could not find item {item.construct_string()}. search results returned: {possible_item_name}\n")
+        possible_item_correction = self.__filter_out_for_name(possible_item_name)
+        item.set_item_type(possible_item_correction[0])
+        item.set_item_name(possible_item_correction[1])
+        item.set_market_value(item_price)
+        return item
+
 
     def get_item_value(self, item:Item) ->Item:
         item_price = self.__retrieve_market_value(item)
+        copied_item = item
+        copied_item.set_market_value(item_price)
         if item_price == None:
-            payload = self.__generate_query_payload(item.construct_string())
-            r = requests.get(STEAM_MARKET_SEARCH_URL, params=payload)
-            possible_item_name = self.__search_for_possible_name(r)
-            item_price = self.__search_for_price(r)
-            print(f"could not find item {item.construct_string()}. search results returned: {possible_item_name}\nupdating entry")
-            possible_item_name = self.__filter_out_for_name(possible_item_name)
-            
-            #todo: update item fields into no object
-        #set price in new bject, return object.
-        print(item_price)
-        pass
+            print("No items found, doing general search...")
+            copied_item = self.__query_search_item(copied_item)
+        return copied_item
 
     def test(self):
-        item = Item("Aug", "StoRm", 1, condition=Condition.FACTORY_NEW, username="tester1")
-        print(item.construct_string())
-        self.get_item_value(item)
+        item = Item("aug", "storm", 1, condition=Condition.BATTLE_SCARRED, username="tester1")
+        new_item = self.get_item_value(item)
+        print(new_item.market_value)
+        print(new_item.construct_string())
+
+
         #r = requests.get('https://steamcommunity.com/market/listings/730/StatTrak%E2%84%A2%20AK-47%20%7C%20Legion%20of%20Anubis%20%28Well-Worn%29?filter=AK47&cc=us')
         #print(r.text)
         #print("\n\n\n")
