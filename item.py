@@ -18,6 +18,8 @@ class Item:
         self.bought_price = bought_price
         self.quantity = quanity
         self.condition = condition
+        if isinstance(condition, str):
+            self.condition = Item.get_condition_from_str(condition)
         self.stattrack = stattrack
         if username == None:
             username = "."
@@ -26,6 +28,21 @@ class Item:
         if date is None:
             self.date = datetime.datetime.now()
         self.market_value = None
+
+    def get_condition_from_str(str):
+        match str:
+            case "NONE":
+                return Condition.NULL
+            case "Battle-Scarred":
+                return Condition.BATTLE_SCARRED
+            case "Well-Worn":
+                return Condition.WELL_WORN
+            case "Field-Tested":
+                return Condition.FIELD_TESTED
+            case "Minimal Wear":
+                return Condition.MINIMAL_WEAR
+            case "Factory New":
+                return Condition.FACTORY_NEW
 
     def get_full_item_name(self):
         ##create full name: "sticker | parris 2025" or "statrack ak47 | anubis"
@@ -103,3 +120,9 @@ class Item:
 
     def set_market_value(self, value):
         self.market_value = value
+
+    def __str__(self):
+        return self.construct_string()
+    
+    def __repr__(self):
+        return self.__str__()

@@ -2,6 +2,7 @@ from constants import *
 from item import *
 from bs4 import BeautifulSoup
 
+import time
 import re
 import requests
 #TODO set a time limit between item lookup and query
@@ -105,6 +106,7 @@ class Steam_Market_Scraper():
         copied_item.set_market_value(item_price)
         if item_price == None:
             print("No items found, doing general search...")
+            time.sleep(STEAM_QUERY_DELAY)
             copied_item = self.__query_search_item(copied_item)
         return copied_item
 

@@ -1,14 +1,18 @@
 from inventory_lsit import *
 from steam_market_scraper import *
 import os
+#TODO AFTER ALL THE ITEMS ARE DISPLAYED, ALLOW USER TO CHOOSE AN ITEM FROM THE LIST ALREAY DISPLAYED AND GET A PRICE DIF
 
 #TODO pull from db all into an item array, then get prices for each of them. dont throw away this data, keep it pooled so that if more request are sent in the same session its not spamming server
+#TODO error catch when user doesnt provide an interger int(users_inpute)
 class System_State(Enum):
     MAIN_MENU = 0
     ADD_ITEM_OVERVIEW = 1
     INVENTORY_ITEM_OVERVIEW = 2
     VIEW_BUFFER_OUTPUT = 3
     DISPLAY_USERS_INTO_INVENTORY = 4
+    DISPLAY_PRICE_OPTIONS = 5
+    VIEW_BUFFER_INTO_ITEM_SPECIFIC_VALUE = 6
 
 class App_Container():
     def __init__(self):
@@ -46,6 +50,15 @@ def display(current_state, users_input, app_container):
             for x in range(len(all_users)):
                 print(f"{x}. {all_users[x]}")
 
+        case System_State.DISPLAY_PRICE_OPTIONS:
+            print('''Options
+1. Display all profits
+2. Display User Profits
+3. Display Specific Item Profit''')
+            
+        case System_State.VIEW_BUFFER_INTO_ITEM_SPECIFIC_VALUE:
+            print(app_container.buffer_output)
+
         case _:
             raise Exception("unkown state condition raised")
     print('q to quit    |   x back to main menu' )
@@ -68,7 +81,7 @@ def reaction(current_state, users_input, app_container):
             elif users_input == '2':
                 return System_State.INVENTORY_ITEM_OVERVIEW
             elif users_input == '3':
-                pass
+                return System_State.DISPLAY_PRICE_OPTIONS
 
         case System_State.ADD_ITEM_OVERVIEW:
             if users_input == '1':
@@ -96,7 +109,29 @@ def reaction(current_state, users_input, app_container):
             if input_int >= 0 and input_int < len(user_list):
                 app_container.buffer_output = app_container.inventory.get_users_inventory(user_list[input_int])
                 return System_State.VIEW_BUFFER_OUTPUT
+        
+        case System_State.DISPLAY_PRICE_OPTIONS:
+            if users_input == '1':
+                pass#TODO
+            elif users_input == '2':
+                pass#TODO
+            elif users_input == '3':
+                inv = app_container.inventory.get_whole_inventory()
+                buffer = ""
+                for x in range(len(inv)):
+                    buffer += f"{x}: {inv[x]}\n"
+                app_container.buffer_output = buffer
+                return System_State.VIEW_BUFFER_INTO_ITEM_SPECIFIC_VALUE
             
+        case System_State.VIEW_BUFFER_INTO_ITEM_SPECIFIC_VALUE:
+            try:
+                input_int = int(users_input)
+                item_list = app_container.inventory.get_whole_inventory()
+                if input_int >= 0 and input_int < len(item_list):
+                    #app_container.buffer_output = 
+                    pass
+            except:
+                pass
 
         case _:
             raise Exception("unkown state contition raised in reaction")

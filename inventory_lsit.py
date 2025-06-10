@@ -84,7 +84,10 @@ class Inventory_List:
     def get_whole_inventory(self):
         query = f"SELECT * FROM {SQL_INVENTORY_TABLE_NAME}"
         buffer = self.sql_inventory.execute(query).fetchall()
-        return buffer
+        buff_list = []
+        for x in buffer:
+            buff_list.append(Item(x[1], x[2], 999999, 999999, x[3], x[4]))
+        return buff_list
 
     def display_whole_history(self):
         query = f"SELECT * FROM {SQL_PURCHASE_HISTORY_TABLE_NAME}"
