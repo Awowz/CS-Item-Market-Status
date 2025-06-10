@@ -71,6 +71,9 @@ class Item:
             return self.__get_glove_kinfe_string()
         else:
             return self.__get_weapon_string()
+        
+    def construct_string_with_userID(self):
+        return self.construct_string() + f": {self.username}"
 
     def __get_glove_kinfe_string(self):
         return f"{STAR} {self.__get_weapon_string()}"
@@ -122,7 +125,7 @@ class Item:
         self.market_value = value
 
     def __str__(self):
-        return self.construct_string()
+        return self.construct_string_with_userID()
     
     def __repr__(self):
         return self.__str__()

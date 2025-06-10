@@ -2,7 +2,7 @@ from inventory_lsit import *
 from steam_market_scraper import *
 import os
 #TODO AFTER ALL THE ITEMS ARE DISPLAYED, ALLOW USER TO CHOOSE AN ITEM FROM THE LIST ALREAY DISPLAYED AND GET A PRICE DIF
-
+#next step: utilize inventory_list.get_history_price_of_item() and steam_scraper to calculate value gained from each itme, total value gained nad percentage increase for each entrie (1.00 spent 1.50 market value ->50% gain)
 #TODO pull from db all into an item array, then get prices for each of them. dont throw away this data, keep it pooled so that if more request are sent in the same session its not spamming server
 #TODO error catch when user doesnt provide an interger int(users_inpute)
 class System_State(Enum):
@@ -217,7 +217,9 @@ def main():
     current_state = System_State.MAIN_MENU
     users_input = ""
     app_container = App_Container()
-    clear()
+    #clear()
+    item = Item("Case", "Operation Bravo", 1, condition=Condition.NULL, username="AWOWZ")
+    print(app_container.inventory.get_history_price_of_item(item))
     while True:
         display(current_state, users_input, app_container)
         users_input = input()

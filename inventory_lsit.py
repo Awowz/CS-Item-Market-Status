@@ -86,7 +86,7 @@ class Inventory_List:
         buffer = self.sql_inventory.execute(query).fetchall()
         buff_list = []
         for x in buffer:
-            buff_list.append(Item(x[1], x[2], 999999, 999999, x[3], x[4]))
+            buff_list.append(Item(x[1], x[2], 999999, 999999, x[3], x[4], x[5]))
         return buff_list
 
     def display_whole_history(self):
@@ -111,6 +111,13 @@ class Inventory_List:
         if buffer == []:
             raise Exception("item currently does not exist in inventory.db")
         return buffer[0][0]
+    
+    def __search_history_from_item_id(self, id):
+        query = f'''SELECT {SQL_PURCHASE_HISTORY_PRICE} FROM {SQL_PURCHASE_HISTORY_TABLE_NAME}
+        WHERE {SQL_PURCHASE_HISTORY_FOREIGN_INVENTORY_ID} == '{id}'
+        '''
+        buffer = self.sql_inventory.execute(query).fetchall()
+        return buffer
     
     def get_usernames_in_inventory(self) -> list[str]:
         query = f'''SELECT {SQL_INVENTORY_USERNAME} FROM {SQL_INVENTORY_TABLE_NAME} GROUP BY {SQL_INVENTORY_USERNAME}'''
@@ -142,3 +149,8 @@ class Inventory_List:
         query = f"SELECT * FROM {SQL_INVENTORY_TABLE_NAME}"
         buffer = self.sql_inventory.execute(query).fetchall()
         return buffer
+    
+    def get_history_price_of_item(self, item:Item):
+        item_id = self.__get_inventory_id(item)
+        output = self.__search_history_from_item_id(item_id)
+        return output
