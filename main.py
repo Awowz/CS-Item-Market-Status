@@ -3,6 +3,7 @@ from steam_market_scraper import *
 import os
 #TODO AFTER ALL THE ITEMS ARE DISPLAYED, ALLOW USER TO CHOOSE AN ITEM FROM THE LIST ALREAY DISPLAYED AND GET A PRICE DIF
 #next step: utilize inventory_list.get_history_price_of_item() and steam_scraper to calculate value gained from each itme, total value gained nad percentage increase for each entrie (1.00 spent 1.50 market value ->50% gain)
+#implimented get_str_item_value_output in main, please test and utilize for the step above
 #TODO pull from db all into an item array, then get prices for each of them. dont throw away this data, keep it pooled so that if more request are sent in the same session its not spamming server
 #TODO error catch when user doesnt provide an interger int(users_inpute)
 class System_State(Enum):
@@ -18,6 +19,7 @@ class App_Container():
     def __init__(self):
         self.inventory = Inventory_List()
         self.buffer_output = ""
+        self.scraper = Steam_Market_Scraper()
 
     
         
@@ -63,7 +65,6 @@ def display(current_state, users_input, app_container):
             raise Exception("unkown state condition raised")
     print('q to quit    |   x back to main menu' )
         
-
 
 
 def reaction(current_state, users_input, app_container):
@@ -212,6 +213,12 @@ def create_item(app_container):
     generated_item = Item(user_type, user_item_name, user_price, user_quantity, user_condition, user_stattrack, user_name)
     app_container.inventory.add_item_and_history(generated_item)
 
+def get_str_item_value_output(app_container, items: list[Item]):
+    buffer = ""
+    for x in items:
+        item_value = app_container.scraper.get_item_value(x)
+        buffer += f"{x.construct_string()}\n\tbought at {x.bought_price}. Current value: {item_value.market_value}\n\tprofit: {item_value.market_value - x.bought_price}"
+    app_container.buffer_output = buffer
 
 def main():
     current_state = System_State.MAIN_MENU
