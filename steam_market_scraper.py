@@ -101,6 +101,8 @@ class Steam_Market_Scraper():
 
 
     def get_item_value(self, item:Item) ->Item:
+        print("searching for item, putting delay on request to not overwhelm servers, please wait....")
+        time.sleep(STEAM_QUERY_DELAY)
         item_price = self.__retrieve_market_value(item)
         copied_item = item
         copied_item.set_market_value(item_price)

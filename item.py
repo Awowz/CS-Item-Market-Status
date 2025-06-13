@@ -123,6 +123,9 @@ class Item:
 
     def set_market_value(self, value):
         self.market_value = value
+    
+    def set_bought_price(self, value):
+        self.bought_price = value
 
     def __str__(self):
         return self.construct_string_with_userID()

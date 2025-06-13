@@ -129,8 +129,8 @@ def reaction(current_state, users_input, app_container):
                 input_int = int(users_input)
                 item_list = app_container.inventory.get_whole_inventory()
                 if input_int >= 0 and input_int < len(item_list):
-                    #app_container.buffer_output = 
-                    pass
+                    app_container.buffer_output = get_str_item_value_output(app_container, item_list[input_int])
+                    return System_State.VIEW_BUFFER_OUTPUT
             except:
                 pass
 
@@ -213,20 +213,27 @@ def create_item(app_container):
     generated_item = Item(user_type, user_item_name, user_price, user_quantity, user_condition, user_stattrack, user_name)
     app_container.inventory.add_item_and_history(generated_item)
 
-def get_str_item_value_output(app_container, items: list[Item]):
+def get_str_item_value_output(app_container, item: Item):
+    history_price = app_container.inventory.get_history_price_of_item(item)
+    items = [item] * len(history_price)
+    item_value = app_container.scraper.get_item_value(item)
     buffer = ""
-    for x in items:
-        item_value = app_container.scraper.get_item_value(x)
-        buffer += f"{x.construct_string()}\n\tbought at {x.bought_price}. Current value: {item_value.market_value}\n\tprofit: {item_value.market_value - x.bought_price}"
-    app_container.buffer_output = buffer
+    total_spent = 0
+    total_gained = 0
+    for x in range(len(items)):
+        items[x].set_bought_price(history_price[x][0])
+        total_spent += history_price[x][0]
+        items[x].set_market_value(item_value.market_value)
+        total_gained += items[x].market_value
+        buffer += f"{items[x].construct_string()}\n\tBought at {items[x].bought_price}. | Current value: {items[x].market_value}\n\tprofit: {items[x].market_value - items[x].bought_price}\n"
+    buffer += f"total spent: {total_spent}  |  total gained: {total_gained - total_spent}"
+    return buffer
 
 def main():
     current_state = System_State.MAIN_MENU
     users_input = ""
     app_container = App_Container()
-    #clear()
-    item = Item("Case", "Operation Bravo", 1, condition=Condition.NULL, username="AWOWZ")
-    print(app_container.inventory.get_history_price_of_item(item))
+    clear()
     while True:
         display(current_state, users_input, app_container)
         users_input = input()
