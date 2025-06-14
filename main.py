@@ -1,9 +1,9 @@
 from inventory_lsit import *
 from steam_market_scraper import *
 import os
-#TODO AFTER ALL THE ITEMS ARE DISPLAYED, ALLOW USER TO CHOOSE AN ITEM FROM THE LIST ALREAY DISPLAYED AND GET A PRICE DIF
-#next step: utilize inventory_list.get_history_price_of_item() and steam_scraper to calculate value gained from each itme, total value gained nad percentage increase for each entrie (1.00 spent 1.50 market value ->50% gain)
-#implimented get_str_item_value_output in main, please test and utilize for the step above
+#next display profits from user (keeping track of multiple items)
+#TODO calculate value gained from each itme, total value gained nad percentage increase for each entrie (1.00 spent 1.50 market value ->50% gain)
+#TODO when editing entry if already exisitning, then just add its history to existin item hirstory
 #TODO pull from db all into an item array, then get prices for each of them. dont throw away this data, keep it pooled so that if more request are sent in the same session its not spamming server
 #TODO error catch when user doesnt provide an interger int(users_inpute)
 class System_State(Enum):
@@ -17,6 +17,7 @@ class System_State(Enum):
 
 class App_Container():
     def __init__(self):
+        self.error = ""
         self.inventory = Inventory_List()
         self.buffer_output = ""
         self.scraper = Steam_Market_Scraper()
@@ -25,6 +26,8 @@ class App_Container():
         
 
 def display(current_state, users_input, app_container):
+    if app_container.error != "":
+        print(f"ERROR MSG:{app_container.error}")
     match current_state:
 
         case System_State.MAIN_MENU:
@@ -131,8 +134,10 @@ def reaction(current_state, users_input, app_container):
                 if input_int >= 0 and input_int < len(item_list):
                     app_container.buffer_output = get_str_item_value_output(app_container, item_list[input_int])
                     return System_State.VIEW_BUFFER_OUTPUT
-            except:
-                pass
+            except ValueError as e:
+                app_container.error = "Invalid input, please try again"
+            except Exception as e:
+                app_container.error = e
 
         case _:
             raise Exception("unkown state contition raised in reaction")
@@ -191,8 +196,6 @@ def create_item(app_container):
         try:
             user_price = input()
             user_price = float(user_price)
-            if user_price <= 0.009:
-                raise Exception("invalid input")
             break
         except:
             print("invalid input, please try again")
@@ -237,6 +240,7 @@ def main():
     while True:
         display(current_state, users_input, app_container)
         users_input = input()
+        app_container.error = ""
         current_state = reaction(current_state, users_input, app_container)
         clear()
 
