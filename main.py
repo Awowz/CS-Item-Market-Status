@@ -1,6 +1,7 @@
 from inventory_lsit import *
 from steam_market_scraper import *
 import os
+#next when converting raw inv to items: give correct quantity please. this will affect other functions.
 #next display profits from user (keeping track of multiple items)
 #TODO calculate value gained from each itme, total value gained nad percentage increase for each entrie (1.00 spent 1.50 market value ->50% gain)
 #TODO when editing entry if already exisitning, then just add its history to existin item hirstory
@@ -14,6 +15,7 @@ class System_State(Enum):
     DISPLAY_USERS_INTO_INVENTORY = 4
     DISPLAY_PRICE_OPTIONS = 5
     VIEW_BUFFER_INTO_ITEM_SPECIFIC_VALUE = 6
+    VIEW_BUFFER_INTO_VIEW_PLAYERS = 7
 
 class App_Container():
     def __init__(self):
@@ -62,7 +64,16 @@ def display(current_state, users_input, app_container):
 3. Display Specific Item Profit''')
             
         case System_State.VIEW_BUFFER_INTO_ITEM_SPECIFIC_VALUE:
-            print(app_container.buffer_output)
+            inv = app_container.inventory.get_whole_inventory()
+            buffer = ""
+            for x in range(len(inv)):
+                buffer += f"{x}: {inv[x]}\n"
+            print(buffer)
+
+        case System_State.VIEW_BUFFER_INTO_VIEW_PLAYERS:
+            all_users = app_container.inventory.get_usernames_in_inventory()
+            for x in range(len(all_users)):
+                print(f"{x}. {all_users[x]}")
 
         case _:
             raise Exception("unkown state condition raised")
@@ -116,15 +127,10 @@ def reaction(current_state, users_input, app_container):
         
         case System_State.DISPLAY_PRICE_OPTIONS:
             if users_input == '1':
-                pass#TODO
+                pass
             elif users_input == '2':
-                pass#TODO
+                return System_State.VIEW_BUFFER_INTO_VIEW_PLAYERS
             elif users_input == '3':
-                inv = app_container.inventory.get_whole_inventory()
-                buffer = ""
-                for x in range(len(inv)):
-                    buffer += f"{x}: {inv[x]}\n"
-                app_container.buffer_output = buffer
                 return System_State.VIEW_BUFFER_INTO_ITEM_SPECIFIC_VALUE
             
         case System_State.VIEW_BUFFER_INTO_ITEM_SPECIFIC_VALUE:
@@ -138,6 +144,20 @@ def reaction(current_state, users_input, app_container):
                 app_container.error = "Invalid input, please try again"
             except Exception as e:
                 app_container.error = e
+
+        case System_State.VIEW_BUFFER_INTO_VIEW_PLAYERS:
+            try:
+                input_int = int(users_input)
+                user_list = app_container.inventory.get_usernames_in_inventory()
+                if input_int >= 0 and input_int < len(user_list):
+                    items_from_user = app_container.inventory.get_users_inventory(user_list[input_int])
+                    #TODO
+                    return System_State.VIEW_BUFFER_OUTPUT
+            except ValueError as e:
+                app_container.error = "Invalid input, please try again"
+            except Exception as e:
+                app_container.error = e
+
 
         case _:
             raise Exception("unkown state contition raised in reaction")

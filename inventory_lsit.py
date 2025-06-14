@@ -81,6 +81,20 @@ class Inventory_List:
         buffer = self.sql_inventory.execute(query).fetchall()
         print(buffer)
 
+    def __convert_inv_and_history_to_item(self, inv, hist_price):    
+        temp = Item(inv[1], inv[2], hist_price, 1, inv[3], inv[4], inv[5])
+        return temp
+    
+    def __convert_list_of_inv_to_item(self, raw_item_lst) -> list[Item]:
+        buffer_items = []
+        for x in raw_item_lst:
+            raw_history_prices = self.__search_history_from_item_id(x[0])
+            for y in raw_history_prices:
+                temp = self.__convert_inv_and_history_to_item(x, y[0])
+                buffer_items.append(temp)
+        return buffer_items
+
+
     def get_whole_inventory(self):
         query = f"SELECT * FROM {SQL_INVENTORY_TABLE_NAME}"
         buffer = self.sql_inventory.execute(query).fetchall()
@@ -129,7 +143,8 @@ class Inventory_List:
     
     def get_users_inventory(self, username:str):
         query = f"SELECT * FROM {SQL_INVENTORY_TABLE_NAME} WHERE {SQL_INVENTORY_USERNAME} == '{username}'"
-        buffer = self.sql_inventory.execute(query).fetchall()
+        raw_items_list = self.sql_inventory.execute(query).fetchall()
+        buffer = self.__convert_list_of_inv_to_item(raw_items_list)
         return buffer
     
     def get_numb_of_item_related_history(self, item:Item):
