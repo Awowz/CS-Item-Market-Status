@@ -60,9 +60,12 @@ class Item:
         return f"{self.username} | {buffer}"
 
 
-    def get_total_value(self):
-        ##return quantity * bought price format float
-        pass
+    def get_total_profit(self):
+        return (self.quantity * self.market_value) - self.get_total_spent()
+        
+
+    def get_total_spent(self):
+        return self.quantity * self.bought_price
 
     def construct_string(self):
         if self.type.title() in CS_UNIQUE_ITEMS:
@@ -73,7 +76,7 @@ class Item:
             return self.__get_weapon_string()
         
     def construct_string_with_userID(self):
-        return self.construct_string() + f": {self.username}"
+        return f"{self.quantity} x " + self.construct_string() + f": {self.username}"
 
     def __get_glove_kinfe_string(self):
         return f"{STAR} {self.__get_weapon_string()}"

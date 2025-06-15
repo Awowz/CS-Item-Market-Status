@@ -1,7 +1,6 @@
 from inventory_lsit import *
 from steam_market_scraper import *
 import os
-#next when converting raw inv to items: give correct quantity please. this will affect other functions.
 #next display profits from user (keeping track of multiple items)
 #TODO calculate value gained from each itme, total value gained nad percentage increase for each entrie (1.00 spent 1.50 market value ->50% gain)
 #TODO when editing entry if already exisitning, then just add its history to existin item hirstory
@@ -16,6 +15,7 @@ class System_State(Enum):
     DISPLAY_PRICE_OPTIONS = 5
     VIEW_BUFFER_INTO_ITEM_SPECIFIC_VALUE = 6
     VIEW_BUFFER_INTO_VIEW_PLAYERS = 7
+    VIEW_BUFFER_WHOLE_INVENTORY = 8
 
 class App_Container():
     def __init__(self):
@@ -75,6 +75,12 @@ def display(current_state, users_input, app_container):
             for x in range(len(all_users)):
                 print(f"{x}. {all_users[x]}")
 
+        case System_State.VIEW_BUFFER_WHOLE_INVENTORY:
+            items = app_container.inventory.get_whole_inventory()
+            buffer = ""
+            for x in items:
+                buffer += f"{x}\n"
+            print(buffer)
         case _:
             raise Exception("unkown state condition raised")
     print('q to quit    |   x back to main menu' )
@@ -107,14 +113,15 @@ def reaction(current_state, users_input, app_container):
             
         case System_State.INVENTORY_ITEM_OVERVIEW:
             if users_input =='1':
-                app_container.buffer_output = app_container.inventory.get_whole_inventory()
-                return System_State.VIEW_BUFFER_OUTPUT
+                return System_State.VIEW_BUFFER_WHOLE_INVENTORY
             elif users_input == '2':
                 return System_State.DISPLAY_USERS_INTO_INVENTORY
             elif users_input == '3':
                 pass
 
         case System_State.VIEW_BUFFER_OUTPUT:
+            pass
+        case System_State.VIEW_BUFFER_WHOLE_INVENTORY:
             pass
 
         case System_State.DISPLAY_USERS_INTO_INVENTORY:
@@ -237,19 +244,17 @@ def create_item(app_container):
     app_container.inventory.add_item_and_history(generated_item)
 
 def get_str_item_value_output(app_container, item: Item):
-    history_price = app_container.inventory.get_history_price_of_item(item)
-    items = [item] * len(history_price)
+    item_with_history = app_container.inventory.get_accurate_items_history_from_item(item)
     item_value = app_container.scraper.get_item_value(item)
     buffer = ""
     total_spent = 0
     total_gained = 0
-    for x in range(len(items)):
-        items[x].set_bought_price(history_price[x][0])
-        total_spent += history_price[x][0]
-        items[x].set_market_value(item_value.market_value)
-        total_gained += items[x].market_value
-        buffer += f"{items[x].construct_string()}\n\tBought at {items[x].bought_price}. | Current value: {items[x].market_value}\n\tprofit: {items[x].market_value - items[x].bought_price}\n"
-    buffer += f"total spent: {total_spent}  |  total gained: {total_gained - total_spent}"
+    for single_item in item_with_history:
+        total_spent += single_item.bought_price * single_item.quantity
+        single_item.set_market_value(item_value.market_value)
+        total_gained += single_item.market_value * single_item.quantity
+        buffer += f"{single_item.construct_string()}\n\tBought {single_item.quantity} at {single_item.bought_price} each (total spent: {single_item.get_total_spent()}).\n\tCurrent value: {single_item.market_value} per item (total: {single_item.market_value * single_item.quantity})\n\tprofit: {single_item.get_total_profit()}\n"
+    buffer += f"total spent: {total_spent}  |  total gained: {total_gained - total_spent}" 
     return buffer
 
 def main():

@@ -81,16 +81,18 @@ class Inventory_List:
         buffer = self.sql_inventory.execute(query).fetchall()
         print(buffer)
 
-    def __convert_inv_and_history_to_item(self, inv, hist_price):    
-        temp = Item(inv[1], inv[2], hist_price, 1, inv[3], inv[4], inv[5])
+    def __convert_inv_and_history_to_item(self, inv, hist_price, quantity = 1):    
+        temp = Item(inv[1], inv[2], hist_price, quantity, inv[3], inv[4], inv[5])
         return temp
     
     def __convert_list_of_inv_to_item(self, raw_item_lst) -> list[Item]:
         buffer_items = []
         for x in raw_item_lst:
             raw_history_prices = self.__search_history_from_item_id(x[0])
-            for y in raw_history_prices:
-                temp = self.__convert_inv_and_history_to_item(x, y[0])
+            history_prices = [temp_item for t in raw_history_prices for temp_item in t]
+            counted_history_price = dict((i, history_prices.count(i)) for i in history_prices)
+            for y in counted_history_price.keys():
+                temp = self.__convert_inv_and_history_to_item(x, y, counted_history_price[y])
                 buffer_items.append(temp)
         return buffer_items
 
@@ -100,7 +102,7 @@ class Inventory_List:
         buffer = self.sql_inventory.execute(query).fetchall()
         buff_list = []
         for x in buffer:
-            buff_list.append(Item(x[1], x[2], 999999, 999999, x[3], x[4], x[5]))
+            buff_list.append(Item(x[1], x[2], 999999, self.__get_total_count_of_item(x[0]), x[3], x[4], x[5]))
         return buff_list
 
     def display_whole_history(self):
@@ -155,15 +157,24 @@ class Inventory_List:
         #get sum of all entries related to item ID
         pass
 
+    def get_raw_item_from_id(self, item_id):
+        query = f"SELECT * FROM {SQL_INVENTORY_TABLE_NAME} WHERE {SQL_INVENTORY_INDEX} == '{item_id}'"
+        raw_item = self.sql_inventory.execute(query).fetchall()
+        return raw_item
 
     def import_from_google_sheets(self):
         ##scrape from a provided link all of the entries. add them to the DB,
         pass
 
-    def get_list_items(self) ->list[Item]:
-        query = f"SELECT * FROM {SQL_INVENTORY_TABLE_NAME}"
-        buffer = self.sql_inventory.execute(query).fetchall()
-        return buffer
+    def get_accurate_items_history_from_item(self, item:Item):
+        item_id = self.__get_inventory_id(item)
+        raw_item = self.get_raw_item_from_id(item_id)
+        return self.__convert_list_of_inv_to_item(raw_item)
+
+    def __get_total_count_of_item(self, id):
+        hist = self.__search_history_from_item_id(id)
+        return len(hist)
+
     
     def get_history_price_of_item(self, item:Item):
         item_id = self.__get_inventory_id(item)
