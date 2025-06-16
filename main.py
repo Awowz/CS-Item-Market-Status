@@ -253,8 +253,8 @@ def get_str_item_value_output(app_container, item: Item):
         total_spent += single_item.bought_price * single_item.quantity
         single_item.set_market_value(item_value.market_value)
         total_gained += single_item.market_value * single_item.quantity
-        buffer += f"{single_item.construct_string()}\n\tBought {single_item.quantity} at {single_item.bought_price} each (total spent: {single_item.get_total_spent()}).\n\tCurrent value: {single_item.market_value} per item (total: {single_item.market_value * single_item.quantity})\n\tprofit: {single_item.get_total_profit()}\n"
-    buffer += f"total spent: {total_spent}  |  total gained: {total_gained - total_spent}" 
+        buffer += f"{TEXT_UNDERLINE}{single_item.construct_string()}{TEXT_ENDC}\n---------------------------------\nCurrent Market Value: {single_item.market_value}\nBought {single_item.quantity} at {single_item.bought_price} Each\nSpent: {single_item.get_total_spent()}\nProfit: {single_item.get_total_profit()}\n\n"
+    buffer += f"---------------------------------\n{TEXT_BOLD}Total Spent: {total_spent}\nTotal Market Value: {total_gained}\nTotal Profit: {total_gained - total_spent}{TEXT_ENDC}\n" 
     return buffer
 
 def main():

@@ -49,3 +49,13 @@ STEAM_LIST_URL = "listings"
 STEAM_QUERY_DELAY = 15.0
 
 CS_UNIQUE_ITEMS = ["Case", "Pin", "Knife", "Key", "Pass"] #these items do not follow the standard str format
+
+TEXT_HEADER = '\033[95m'
+TEXT_OKBLUE = '\033[94m'
+TEXT_OKCYAN = '\033[96m'
+TEXT_OKGREEN = '\033[92m'
+TEXT_WARNING = '\033[93m'
+TEXT_FAIL = '\033[91m'
+TEXT_ENDC = '\033[0m'
+TEXT_BOLD = '\033[1m'
+TEXT_UNDERLINE = '\033[4m'
