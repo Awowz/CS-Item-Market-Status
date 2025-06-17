@@ -1,7 +1,7 @@
 from inventory_lsit import *
 from steam_market_scraper import *
 import os
-#next display profits from user (keeping track of multiple items)
+#next do users_input in reaction. take users input (selecting profile), display all items in user for selection
 #TODO calculate value gained from each itme, total value gained nad percentage increase for each entrie (1.00 spent 1.50 market value ->50% gain)
 #TODO when editing entry if already exisitning, then just add its history to existin item hirstory
 #TODO pull from db all into an item array, then get prices for each of them. dont throw away this data, keep it pooled so that if more request are sent in the same session its not spamming server
@@ -16,6 +16,7 @@ class System_State(Enum):
     VIEW_BUFFER_INTO_ITEM_SPECIFIC_VALUE = 6
     VIEW_BUFFER_INTO_VIEW_PLAYERS = 7
     VIEW_BUFFER_WHOLE_INVENTORY = 8
+    REMOVE_ITEM_PROFILE_SELECT = 9
 
 class App_Container():
     def __init__(self):
@@ -29,7 +30,7 @@ class App_Container():
 
 def display(current_state, users_input, app_container):
     if app_container.error != "":
-        print(f"ERROR MSG:{app_container.error}")
+        print(f"{TEXT_WARNING}ERROR MSG:{app_container.error}{TEXT_ENDC}")
     match current_state:
 
         case System_State.MAIN_MENU:
@@ -41,7 +42,9 @@ def display(current_state, users_input, app_container):
         case System_State.ADD_ITEM_OVERVIEW:
             print('''Options
 1. Google sheets
-2. Add item manually''')
+2. Add item manually
+3. Edit Item
+4. Remove Item''')
             
         case System_State.INVENTORY_ITEM_OVERVIEW:
             print('''Options
@@ -51,11 +54,12 @@ def display(current_state, users_input, app_container):
 
         case System_State.VIEW_BUFFER_OUTPUT:
             print(app_container.buffer_output)
-
         case System_State.DISPLAY_USERS_INTO_INVENTORY:
-            all_users = app_container.inventory.get_usernames_in_inventory()
-            for x in range(len(all_users)):
-                print(f"{x}. {all_users[x]}")
+            print(display_user_profiles(app_container))
+        case System_State.REMOVE_ITEM_PROFILE_SELECT:
+            print(display_user_profiles(app_container))
+        case System_State.VIEW_BUFFER_INTO_VIEW_PLAYERS:
+            print(display_user_profiles(app_container))
 
         case System_State.DISPLAY_PRICE_OPTIONS:
             print('''Options
@@ -70,17 +74,16 @@ def display(current_state, users_input, app_container):
                 buffer += f"{x}: {inv[x]}\n"
             print(buffer)
 
-        case System_State.VIEW_BUFFER_INTO_VIEW_PLAYERS:
-            all_users = app_container.inventory.get_usernames_in_inventory()
-            for x in range(len(all_users)):
-                print(f"{x}. {all_users[x]}")
-
         case System_State.VIEW_BUFFER_WHOLE_INVENTORY:
             items = app_container.inventory.get_whole_inventory()
             buffer = ""
             for x in items:
                 buffer += f"{x}\n"
             print(buffer)
+
+        case System_State.REMOVE_ITEM_PROFILE_SELECT:
+            print("TODO")
+
         case _:
             raise Exception("unkown state condition raised")
     print('q to quit    |   x back to main menu' )
@@ -110,6 +113,10 @@ def reaction(current_state, users_input, app_container):
             elif users_input == '2':
                 create_item(app_container)
                 return System_State.ADD_ITEM_OVERVIEW
+            elif users_input == '3':
+                pass
+            elif users_input == '4':
+                return System_State.REMOVE_ITEM_PROFILE_SELECT
             
         case System_State.INVENTORY_ITEM_OVERVIEW:
             if users_input =='1':
@@ -145,7 +152,7 @@ def reaction(current_state, users_input, app_container):
                 input_int = int(users_input)
                 item_list = app_container.inventory.get_whole_inventory()
                 if input_int >= 0 and input_int < len(item_list):
-                    app_container.buffer_output = get_str_item_value_output(app_container, item_list[input_int])
+                    app_container.buffer_output = get_str_item_value_output(app_container, [item_list[input_int]])
                     return System_State.VIEW_BUFFER_OUTPUT
             except ValueError as e:
                 app_container.error = "Invalid input, please try again"
@@ -158,12 +165,15 @@ def reaction(current_state, users_input, app_container):
                 user_list = app_container.inventory.get_usernames_in_inventory()
                 if input_int >= 0 and input_int < len(user_list):
                     items_from_user = app_container.inventory.get_users_inventory(user_list[input_int])
-                    #TODO
+                    app_container.buffer_output = get_str_item_value_output(app_container, items_from_user)
                     return System_State.VIEW_BUFFER_OUTPUT
             except ValueError as e:
                 app_container.error = "Invalid input, please try again"
             except Exception as e:
                 app_container.error = e
+
+        case System_State.REMOVE_ITEM_PROFILE_SELECT:
+            pass#TODO
 
 
         case _:
@@ -173,6 +183,14 @@ def reaction(current_state, users_input, app_container):
 
 def clear():
     os.system('clr' if os.name == 'nt' else 'clear')
+
+def display_user_profiles(app_container):
+    all_users = app_container.inventory.get_usernames_in_inventory()
+    buffer = ""
+    for x in range(len(all_users)):
+        buffer += f"{x}. {all_users[x]}\n"
+    return buffer
+
 
 def create_item(app_container):
     clear()
@@ -243,18 +261,19 @@ def create_item(app_container):
     generated_item = Item(user_type, user_item_name, user_price, user_quantity, user_condition, user_stattrack, user_name)
     app_container.inventory.add_item_and_history(generated_item)
 
-def get_str_item_value_output(app_container, item: Item):
-    item_with_history = app_container.inventory.get_accurate_items_history_from_item(item)
-    item_value = app_container.scraper.get_item_value(item)
+def get_str_item_value_output(app_container, items: list[Item]):
     buffer = ""
     total_spent = 0
     total_gained = 0
-    for single_item in item_with_history:
-        total_spent += single_item.bought_price * single_item.quantity
-        single_item.set_market_value(item_value.market_value)
-        total_gained += single_item.market_value * single_item.quantity
-        buffer += f"{TEXT_UNDERLINE}{single_item.construct_string()}{TEXT_ENDC}\n---------------------------------\nCurrent Market Value: {single_item.market_value}\nBought {single_item.quantity} at {single_item.bought_price} Each\nSpent: {single_item.get_total_spent()}\nProfit: {single_item.get_total_profit()}\n\n"
-    buffer += f"---------------------------------\n{TEXT_BOLD}Total Spent: {total_spent}\nTotal Market Value: {total_gained}\nTotal Profit: {total_gained - total_spent}{TEXT_ENDC}\n" 
+    for item in items:
+        item_with_history = app_container.inventory.get_accurate_items_history_from_item(item)
+        item_value = app_container.scraper.get_item_value(item)
+        for single_item in item_with_history:
+            total_spent += single_item.bought_price * single_item.quantity
+            single_item.set_market_value(item_value.market_value)
+            total_gained += single_item.market_value * single_item.quantity
+            buffer += f"{TEXT_UNDERLINE}{single_item.construct_string()}{TEXT_ENDC}\n---------------------------------\nCurrent Market Value: {single_item.market_value}\nBought {single_item.quantity} at {single_item.bought_price} Each\nSpent: {single_item.get_total_spent()}\nProfit: {single_item.get_total_profit()}\n\n"
+        buffer += f"---------------------------------\n{TEXT_BOLD}Total Spent: {total_spent}\nTotal Market Value: {total_gained}\nTotal Profit: {total_gained - total_spent}{TEXT_ENDC}\n" 
     return buffer
 
 def main():
