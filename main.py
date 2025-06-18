@@ -1,7 +1,7 @@
 from inventory_lsit import *
 from steam_market_scraper import *
 import os
-#next do users_input in reaction. take users input (selecting profile), display all items in user for selection
+#nnext implement REMOVE_ITEM_SELECT logic
 #TODO calculate value gained from each itme, total value gained nad percentage increase for each entrie (1.00 spent 1.50 market value ->50% gain)
 #TODO when editing entry if already exisitning, then just add its history to existin item hirstory
 #TODO pull from db all into an item array, then get prices for each of them. dont throw away this data, keep it pooled so that if more request are sent in the same session its not spamming server
@@ -17,6 +17,7 @@ class System_State(Enum):
     VIEW_BUFFER_INTO_VIEW_PLAYERS = 7
     VIEW_BUFFER_WHOLE_INVENTORY = 8
     REMOVE_ITEM_PROFILE_SELECT = 9
+    REMOVE_ITEM_SELECT = 10
 
 class App_Container():
     def __init__(self):
@@ -54,6 +55,11 @@ def display(current_state, users_input, app_container):
 
         case System_State.VIEW_BUFFER_OUTPUT:
             print(app_container.buffer_output)
+        case System_State.REMOVE_ITEM_SELECT:
+            buff = ""
+            for x in range(len(app_container.buffer_output)):
+                buff += f"{x}: {app_container.buffer_output[x]}\n"
+            print(buff)
         case System_State.DISPLAY_USERS_INTO_INVENTORY:
             print(display_user_profiles(app_container))
         case System_State.REMOVE_ITEM_PROFILE_SELECT:
@@ -81,8 +87,6 @@ def display(current_state, users_input, app_container):
                 buffer += f"{x}\n"
             print(buffer)
 
-        case System_State.REMOVE_ITEM_PROFILE_SELECT:
-            print("TODO")
 
         case _:
             raise Exception("unkown state condition raised")
@@ -173,6 +177,18 @@ def reaction(current_state, users_input, app_container):
                 app_container.error = e
 
         case System_State.REMOVE_ITEM_PROFILE_SELECT:
+            try:
+                input_int = int(users_input)
+                user_list = app_container.inventory.get_usernames_in_inventory()
+                if input_int >= 0 and input_int < len(user_list):
+                    app_container.buffer_output = app_container.inventory.get_users_inventory(user_list[input_int])
+                    return System_State.REMOVE_ITEM_SELECT
+            except ValueError as e:
+                app_container.error = "Invalid input, please try again"
+            except Exception as e:
+                app_container.error = e
+
+        case System_State.REMOVE_ITEM_SELECT:
             pass#TODO
 
 
