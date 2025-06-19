@@ -18,6 +18,7 @@ class System_State(Enum):
     VIEW_BUFFER_WHOLE_INVENTORY = 8
     REMOVE_ITEM_PROFILE_SELECT = 9
     REMOVE_ITEM_SELECT = 10
+    REMOVE_ITEM_QUATITY = 11
 
 class App_Container():
     def __init__(self):
@@ -25,6 +26,7 @@ class App_Container():
         self.inventory = Inventory_List()
         self.buffer_output = ""
         self.scraper = Steam_Market_Scraper()
+        self.buffer_input = None
 
     
         
@@ -58,7 +60,7 @@ def display(current_state, users_input, app_container):
         case System_State.REMOVE_ITEM_SELECT:
             buff = ""
             for x in range(len(app_container.buffer_output)):
-                buff += f"{x}: {app_container.buffer_output[x]}\n"
+                buff += f"{x}: {app_container.buffer_output[x]} {app_container.buffer_output[x].bought_price}\n"
             print(buff)
         case System_State.DISPLAY_USERS_INTO_INVENTORY:
             print(display_user_profiles(app_container))
@@ -86,6 +88,9 @@ def display(current_state, users_input, app_container):
             for x in items:
                 buffer += f"{x}\n"
             print(buffer)
+
+        case System_State.REMOVE_ITEM_QUATITY:
+            print(f"Enter quantity to remove of {app_container.buffer_output}")
 
 
         case _:
@@ -177,11 +182,13 @@ def reaction(current_state, users_input, app_container):
                 app_container.error = e
 
         case System_State.REMOVE_ITEM_PROFILE_SELECT:
+            app_container.buffer_input = None
             try:
                 input_int = int(users_input)
                 user_list = app_container.inventory.get_usernames_in_inventory()
                 if input_int >= 0 and input_int < len(user_list):
                     app_container.buffer_output = app_container.inventory.get_users_inventory(user_list[input_int])
+                    app_container.buffer_input = app_container.buffer_output
                     return System_State.REMOVE_ITEM_SELECT
             except ValueError as e:
                 app_container.error = "Invalid input, please try again"
@@ -189,8 +196,28 @@ def reaction(current_state, users_input, app_container):
                 app_container.error = e
 
         case System_State.REMOVE_ITEM_SELECT:
-            pass#TODO
+            try:
+                input_int = int(users_input)
+                user_list = app_container.buffer_input
+                if input_int >= 0 and input_int < len(user_list):
+                    app_container.buffer_output = user_list[input_int]
+                    app_container.buffer_input = user_list[input_int]
+                    return System_State.REMOVE_ITEM_QUATITY
+            except ValueError as e:
+                app_container.error = "Invalid input, please try again"
+            except Exception as e:
+                app_container.error = e
 
+        case System_State.REMOVE_ITEM_QUATITY:
+            try:
+                input_int = int(users_input)
+                if input_int >= 1 and input_int < app_container.buffer_input.quantity:
+                    app_container.inventory.remove_item(app_container.buffer_input, input_int)
+                    return System_State.MAIN_MENU
+            except ValueError as e:
+                app_container.error = "Invalid input, please try again"
+            except Exception as e:
+                app_container.error = e
 
         case _:
             raise Exception("unkown state contition raised in reaction")

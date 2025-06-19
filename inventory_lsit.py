@@ -135,6 +135,13 @@ class Inventory_List:
         buffer = self.sql_inventory.execute(query).fetchall()
         return buffer
     
+    def __search_history_id_from_item_id(self, id):
+        query = f'''SELECT {SQL_PURCHASE_HISTORY_ID}, {SQL_PURCHASE_HISTORY_PRICE} FROM {SQL_PURCHASE_HISTORY_TABLE_NAME}
+        WHERE {SQL_PURCHASE_HISTORY_FOREIGN_INVENTORY_ID} == '{id}'
+        '''
+        buffer = self.sql_inventory.execute(query).fetchall()
+        return buffer
+    
     def get_usernames_in_inventory(self) -> list[str]:
         query = f'''SELECT {SQL_INVENTORY_USERNAME} FROM {SQL_INVENTORY_TABLE_NAME} GROUP BY {SQL_INVENTORY_USERNAME}'''
         buffer = self.sql_inventory.execute(query).fetchall()
@@ -180,3 +187,30 @@ class Inventory_List:
         item_id = self.__get_inventory_id(item)
         output = self.__search_history_from_item_id(item_id)
         return output
+    
+    def __remove_history_from_id(self, history_id):
+        query = f"DELETE FROM {SQL_PURCHASE_HISTORY_TABLE_NAME} WHERE {SQL_PURCHASE_HISTORY_ID} == '{history_id}'"
+        self.sql_inventory.execute(query).fetchall()
+        self.sql_connection.commit()
+
+    def __delete_item_from_inventory(self, id):
+        pass
+
+
+    def remove_item(self, item:Item, quantity = 1):
+        item_id = self.__get_inventory_id(item)
+        raw_history = self.__search_history_id_from_item_id(item_id)
+        count = 0
+        for x in raw_history:
+            if x[1] == item.bought_price:
+                count += 1
+                self.__remove_history_from_id(x[0])
+            if count == quantity:
+                break
+        raw_history = self.__search_history_id_from_item_id(item_id)
+        if len(raw_history) == 0:
+            self.__delete_item_from_inventory(item_id)
+        return
+
+
+
