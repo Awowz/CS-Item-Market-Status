@@ -194,7 +194,9 @@ class Inventory_List:
         self.sql_connection.commit()
 
     def __delete_item_from_inventory(self, id):
-        pass
+        query = f"DELETE FROM {SQL_INVENTORY_TABLE_NAME} WHERE {SQL_INVENTORY_INDEX} == '{id}'"
+        self.sql_inventory.execute(query).fetchall()
+        self.sql_connection.commit()
 
 
     def remove_item(self, item:Item, quantity = 1):

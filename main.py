@@ -211,7 +211,7 @@ def reaction(current_state, users_input, app_container):
         case System_State.REMOVE_ITEM_QUATITY:
             try:
                 input_int = int(users_input)
-                if input_int >= 1 and input_int < app_container.buffer_input.quantity:
+                if input_int >= 1 and input_int <= app_container.buffer_input.quantity:
                     app_container.inventory.remove_item(app_container.buffer_input, input_int)
                     return System_State.MAIN_MENU
             except ValueError as e:
@@ -239,7 +239,7 @@ def create_item(app_container):
     clear()
     print("Enter item type, for example: AK47, CASE, STICKER.....")
     user_type = input()
-    print("Enter item name, for example: FOREST DDPAT, OPERATION BRAVO.....")
+    print("Enter item name, for example: FORESTusers_input DDPAT, OPERATION BRAVO.....")
     user_item_name = input()
     print("is item stattrack?")
     while True:
