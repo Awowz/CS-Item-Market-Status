@@ -1,7 +1,7 @@
 from inventory_lsit import *
 from steam_market_scraper import *
 import os
-#next implement edit. edit name, end user, condition, quantity, bought price
+#next implement edit. edit name, end user, condition, quantity, bought price, refactor code from create_item()
 #TODO calculate value gained from each itme, total value gained nad percentage increase for each entrie (1.00 spent 1.50 market value ->50% gain)
 #TODO when editing entry if already exisitning, then just add its history to existin item hirstory
 #TODO pull from db all into an item array, then get prices for each of them. dont throw away this data, keep it pooled so that if more request are sent in the same session its not spamming server
@@ -21,6 +21,7 @@ class System_State(Enum):
     REMOVE_ITEM_QUATITY = 11
     EDIT_ITEM_PROFILE_SELECT = 12
     EDIT_ITEM_SELECT = 13
+    EDIT_ITEM_OPTIONS = 14
 
 class App_Container():
     def __init__(self):
@@ -60,10 +61,9 @@ def display(current_state, users_input, app_container):
         case System_State.VIEW_BUFFER_OUTPUT:
             print(app_container.buffer_output)
         case System_State.REMOVE_ITEM_SELECT:
-            buff = ""
-            for x in range(len(app_container.buffer_output)):
-                buff += f"{x}: {app_container.buffer_output[x]} {app_container.buffer_output[x].bought_price}\n"
-            print(buff)
+            print(display_items_from_buffer(app_container))
+        case System_State.EDIT_ITEM_SELECT:
+            print(display_items_from_buffer(app_container))
         case System_State.DISPLAY_USERS_INTO_INVENTORY:
             print(display_user_profiles(app_container))
         case System_State.REMOVE_ITEM_PROFILE_SELECT:
@@ -78,6 +78,14 @@ def display(current_state, users_input, app_container):
 1. Display all profits
 2. Display User Profits
 3. Display Specific Item Profit''')
+            
+        case System_State.EDIT_ITEM_OPTIONS:
+            print(f'''Options for {app_container.buffer_input} {app_container.buffer_input.bought_price}
+1. Edit Item Type
+2. Edit Item Name
+3. Edit Item Condition
+4. Edit Item's Owner
+3. Edit Item bought at price''')
             
         case System_State.VIEW_BUFFER_INTO_ITEM_SPECIFIC_VALUE:
             inv = app_container.inventory.get_whole_inventory()
@@ -195,17 +203,13 @@ def reaction(current_state, users_input, app_container):
                 return selection
 
         case System_State.REMOVE_ITEM_SELECT:
-            try:
-                input_int = int(users_input)
-                user_list = app_container.buffer_input
-                if input_int >= 0 and input_int < len(user_list):
-                    app_container.buffer_output = user_list[input_int]
-                    app_container.buffer_input = user_list[input_int]
-                    return System_State.REMOVE_ITEM_QUATITY
-            except ValueError as e:
-                app_container.error = "Invalid input, please try again"
-            except Exception as e:
-                app_container.error = e
+            selection = item_select_from_buffer(app_container, users_input, System_State.REMOVE_ITEM_QUATITY)
+            if selection != None:
+                return selection
+        case System_State.EDIT_ITEM_SELECT:
+            selection = item_select_from_buffer(app_container, users_input, System_State.EDIT_ITEM_OPTIONS)
+            if selection != None:
+                return selection
 
         case System_State.REMOVE_ITEM_QUATITY:
             try:
@@ -225,6 +229,12 @@ def reaction(current_state, users_input, app_container):
 
 def clear():
     os.system('clr' if os.name == 'nt' else 'clear')
+
+def display_items_from_buffer(app_container):
+    buff = ""
+    for x in range(len(app_container.buffer_output)):
+        buff += f"{x}: {app_container.buffer_output[x]} {app_container.buffer_output[x].bought_price}\n"
+    return buff
 
 def display_user_profiles(app_container):
     all_users = app_container.inventory.get_usernames_in_inventory()
@@ -246,6 +256,19 @@ def profile_select(app_container, users_input, return_type):
         app_container.error = "Invalid input, please try again"
     except Exception as e:
             app_container.error = e
+
+def item_select_from_buffer(app_container, users_input, return_state):
+    try:
+        input_int = int(users_input)
+        user_list = app_container.buffer_input
+        if input_int >= 0 and input_int < len(user_list):
+            app_container.buffer_output = user_list[input_int]
+            app_container.buffer_input = user_list[input_int]
+            return return_state
+    except ValueError as e:
+        app_container.error = "Invalid input, please try again"
+    except Exception as e:
+        app_container.error = e
 
 def create_item(app_container):
     clear()
