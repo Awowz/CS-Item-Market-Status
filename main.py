@@ -1,7 +1,7 @@
 from inventory_lsit import *
 from steam_market_scraper import *
 import os
-#nnext implement REMOVE_ITEM_SELECT logic
+#next implement edit. edit name, end user, condition, quantity, bought price
 #TODO calculate value gained from each itme, total value gained nad percentage increase for each entrie (1.00 spent 1.50 market value ->50% gain)
 #TODO when editing entry if already exisitning, then just add its history to existin item hirstory
 #TODO pull from db all into an item array, then get prices for each of them. dont throw away this data, keep it pooled so that if more request are sent in the same session its not spamming server
@@ -19,6 +19,8 @@ class System_State(Enum):
     REMOVE_ITEM_PROFILE_SELECT = 9
     REMOVE_ITEM_SELECT = 10
     REMOVE_ITEM_QUATITY = 11
+    EDIT_ITEM_PROFILE_SELECT = 12
+    EDIT_ITEM_SELECT = 13
 
 class App_Container():
     def __init__(self):
@@ -67,6 +69,8 @@ def display(current_state, users_input, app_container):
         case System_State.REMOVE_ITEM_PROFILE_SELECT:
             print(display_user_profiles(app_container))
         case System_State.VIEW_BUFFER_INTO_VIEW_PLAYERS:
+            print(display_user_profiles(app_container))
+        case System_State.EDIT_ITEM_PROFILE_SELECT:
             print(display_user_profiles(app_container))
 
         case System_State.DISPLAY_PRICE_OPTIONS:
@@ -123,7 +127,7 @@ def reaction(current_state, users_input, app_container):
                 create_item(app_container)
                 return System_State.ADD_ITEM_OVERVIEW
             elif users_input == '3':
-                pass
+                return System_State.EDIT_ITEM_PROFILE_SELECT
             elif users_input == '4':
                 return System_State.REMOVE_ITEM_PROFILE_SELECT
             
@@ -182,18 +186,13 @@ def reaction(current_state, users_input, app_container):
                 app_container.error = e
 
         case System_State.REMOVE_ITEM_PROFILE_SELECT:
-            app_container.buffer_input = None
-            try:
-                input_int = int(users_input)
-                user_list = app_container.inventory.get_usernames_in_inventory()
-                if input_int >= 0 and input_int < len(user_list):
-                    app_container.buffer_output = app_container.inventory.get_users_inventory(user_list[input_int])
-                    app_container.buffer_input = app_container.buffer_output
-                    return System_State.REMOVE_ITEM_SELECT
-            except ValueError as e:
-                app_container.error = "Invalid input, please try again"
-            except Exception as e:
-                app_container.error = e
+            selection = profile_select(app_container, users_input, System_State.REMOVE_ITEM_SELECT)
+            if selection != None:
+                return selection
+        case System_State.EDIT_ITEM_PROFILE_SELECT:
+            selection = profile_select(app_container, users_input, System_State.EDIT_ITEM_SELECT)
+            if selection != None:
+                return selection
 
         case System_State.REMOVE_ITEM_SELECT:
             try:
@@ -234,6 +233,19 @@ def display_user_profiles(app_container):
         buffer += f"{x}. {all_users[x]}\n"
     return buffer
 
+def profile_select(app_container, users_input, return_type):
+    app_container.buffer_input = None
+    try:
+        input_int = int(users_input)
+        user_list = app_container.inventory.get_usernames_in_inventory()
+        if input_int >= 0 and input_int < len(user_list):
+            app_container.buffer_output = app_container.inventory.get_users_inventory(user_list[input_int])
+            app_container.buffer_input = app_container.buffer_output
+            return return_type
+    except ValueError as e:
+        app_container.error = "Invalid input, please try again"
+    except Exception as e:
+            app_container.error = e
 
 def create_item(app_container):
     clear()
