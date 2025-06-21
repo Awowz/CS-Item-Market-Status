@@ -85,7 +85,7 @@ def display(current_state, users_input, app_container):
 2. Edit Item Name
 3. Edit Item Condition
 4. Edit Item's Owner
-3. Edit Item bought at price''')
+5. Edit Item bought at price''')
             
         case System_State.VIEW_BUFFER_INTO_ITEM_SPECIFIC_VALUE:
             inv = app_container.inventory.get_whole_inventory()
@@ -167,7 +167,20 @@ def reaction(current_state, users_input, app_container):
                 return System_State.VIEW_BUFFER_INTO_VIEW_PLAYERS
             elif users_input == '3':
                 return System_State.VIEW_BUFFER_INTO_ITEM_SPECIFIC_VALUE
-            
+        case System_State.EDIT_ITEM_OPTIONS:
+            if users_input == '1':
+                new_item_type = user_input_item_type()
+                new_item = app_container.inventory.set_item_type(app_container.buffer_input, new_item_type)
+                app_container.buffer_input = new_item
+                return System_State.EDIT_ITEM_OPTIONS
+            elif users_input == '2':
+                pass
+            elif users_input == '3':
+                pass
+            elif users_input == '4':
+                pass
+            elif users_input == '5':
+                pass
         case System_State.VIEW_BUFFER_INTO_ITEM_SPECIFIC_VALUE:
             try:
                 input_int = int(users_input)
@@ -270,10 +283,14 @@ def item_select_from_buffer(app_container, users_input, return_state):
     except Exception as e:
         app_container.error = e
 
-def create_item(app_container):
-    clear()
+def user_input_item_type():
     print("Enter item type, for example: AK47, CASE, STICKER.....")
     user_type = input()
+    return user_type
+
+def create_item(app_container):
+    clear()
+    user_type = user_input_item_type()
     print("Enter item name, for example: FORESTusers_input DDPAT, OPERATION BRAVO.....")
     user_item_name = input()
     print("is item stattrack?")

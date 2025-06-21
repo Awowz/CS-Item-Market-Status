@@ -213,6 +213,16 @@ class Inventory_List:
         if len(raw_history) == 0:
             self.__delete_item_from_inventory(item_id)
         return
+    
+    def set_item_type(self, item:Item, new_type):
+        items_id = self.__get_inventory_id(item)
+        query = f'''UPDATE {SQL_INVENTORY_TABLE_NAME}
+SET {SQL_INVENTORY_ITEM_TYPE}='{new_type}'
+WHERE {SQL_INVENTORY_INDEX} == '{items_id}' '''
+        self.sql_inventory.execute(query).fetchall()
+        self.sql_connection.commit()
+
+        return self.__convert_list_of_inv_to_item(self.get_raw_item_from_id(items_id))[0]
 
 
 
