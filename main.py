@@ -113,6 +113,7 @@ def display(current_state, users_input, app_container):
 
 def reaction(current_state, users_input, app_container):
     if users_input == 'q':
+        app_container.inventory.close()
         exit()
     elif users_input == 'x':
         return System_State.MAIN_MENU
@@ -174,7 +175,10 @@ def reaction(current_state, users_input, app_container):
                 app_container.buffer_input = new_item
                 return System_State.EDIT_ITEM_OPTIONS
             elif users_input == '2':
-                pass
+                new_name = user_input_item_name()
+                new_item = app_container.inventory.set_item_name(app_container.buffer_input, new_name)
+                app_container.buffer_input = new_item
+                return System_State.EDIT_ITEM_OPTIONS
             elif users_input == '3':
                 pass
             elif users_input == '4':
@@ -286,13 +290,17 @@ def item_select_from_buffer(app_container, users_input, return_state):
 def user_input_item_type():
     print("Enter item type, for example: AK47, CASE, STICKER.....")
     user_type = input()
-    return user_type
+    return user_type.upper()
+
+def user_input_item_name():
+    print("Enter item name, for example: FORESTusers_input DDPAT, OPERATION BRAVO.....")
+    user_item_name = input()
+    return user_item_name.title()
 
 def create_item(app_container):
     clear()
     user_type = user_input_item_type()
-    print("Enter item name, for example: FORESTusers_input DDPAT, OPERATION BRAVO.....")
-    user_item_name = input()
+    user_item_name = user_input_item_name()
     print("is item stattrack?")
     while True:
         print("Enter either y/n:")

@@ -217,12 +217,20 @@ class Inventory_List:
     def set_item_type(self, item:Item, new_type):
         items_id = self.__get_inventory_id(item)
         query = f'''UPDATE {SQL_INVENTORY_TABLE_NAME}
-SET {SQL_INVENTORY_ITEM_TYPE}='{new_type}'
+SET {SQL_INVENTORY_ITEM_TYPE} = '{new_type}'
 WHERE {SQL_INVENTORY_INDEX} == '{items_id}' '''
         self.sql_inventory.execute(query).fetchall()
         self.sql_connection.commit()
-
         return self.__convert_list_of_inv_to_item(self.get_raw_item_from_id(items_id))[0]
 
-
-
+    def set_item_name(self, item:Item, new_name):
+        item_id = self.__get_inventory_id(item)
+        query = f'''UPDATE {SQL_INVENTORY_TABLE_NAME}
+SET {SQL_INVENTORY_ITEM_NAME} = '{new_name}'
+WHERE {SQL_INVENTORY_INDEX} == '{item_id}' '''
+        self.sql_inventory.execute(query).fetchall()
+        self.sql_connection.commit()
+        return self.__convert_list_of_inv_to_item(self.get_raw_item_from_id(item_id))[0]
+    
+    def close(self):
+        self.sql_connection.close()

@@ -29,6 +29,8 @@ class Item:
             self.date = datetime.datetime.now()
         self.market_value = None
 
+        self.debug = True
+
     def get_condition_from_str(str):
         match str:
             case "NONE":
@@ -131,6 +133,8 @@ class Item:
         self.bought_price = value
 
     def __str__(self):
+        if self.debug:
+            return f"{self.type}|{self.name}|{self.condition}|{self.username}|{self.stattrack}"
         return self.construct_string_with_userID()
     
     def __repr__(self):
