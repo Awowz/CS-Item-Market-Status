@@ -29,7 +29,7 @@ class Item:
             self.date = datetime.datetime.now()
         self.market_value = None
 
-        self.debug = True
+        self.debug = False
 
     def get_condition_from_str(str):
         match str:
@@ -45,6 +45,22 @@ class Item:
                 return Condition.MINIMAL_WEAR
             case "Factory New":
                 return Condition.FACTORY_NEW
+    def get_condition_str_from_cond(condition:Condition):
+        match condition:
+            case Condition.NULL:
+                return "NONE"
+            case Condition.BATTLE_SCARRED:
+                return "Battle-Scarred"
+            case Condition.WELL_WORN:
+                return "Well-Worn"
+            case Condition.FIELD_TESTED:
+                return "Field-Tested"
+            case Condition.MINIMAL_WEAR:
+                return "Minimal Wear"
+            case Condition.FACTORY_NEW:
+                return "Factory New"
+            case _:
+                return ""
 
     def get_full_item_name(self):
         ##create full name: "sticker | parris 2025" or "statrack ak47 | anubis"
