@@ -233,10 +233,18 @@ WHERE {SQL_INVENTORY_INDEX} == '{item_id}' '''
         return self.__convert_list_of_inv_to_item(self.get_raw_item_from_id(item_id))[0]
     
     def set_item_condition(self, item:Item, new_condition):
-        print(new_condition)
         item_id = self.__get_inventory_id(item)
         query = f'''UPDATE {SQL_INVENTORY_TABLE_NAME}
 SET {SQL_INVENTORY_CONDITION} = '{new_condition}'
+WHERE {SQL_INVENTORY_INDEX} == '{item_id}' '''
+        self.sql_inventory.execute(query).fetchall()
+        self.sql_connection.commit()
+        return self.__convert_list_of_inv_to_item(self.get_raw_item_from_id(item_id))[0]
+    
+    def set_item_stattrack(self, item:Item, new_stattrack:bool):
+        item_id = self.__get_inventory_id(item)
+        query = f'''UPDATE {SQL_INVENTORY_TABLE_NAME}
+SET {SQL_INVENTORY_STATTRACK} = {new_stattrack}
 WHERE {SQL_INVENTORY_INDEX} == '{item_id}' '''
         self.sql_inventory.execute(query).fetchall()
         self.sql_connection.commit()

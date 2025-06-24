@@ -83,9 +83,10 @@ def display(current_state, users_input, app_container):
             print(f'''Options for {app_container.buffer_input} {app_container.buffer_input.bought_price}
 1. Edit Item Type
 2. Edit Item Name
-3. Edit Item Condition
-4. Edit Item's Owner
-5. Edit Item bought at price''')
+3. Edit Stattrack Bool
+4. Edit Item Condition
+5. Edit Item's Owner
+6. Edit Item bought at price''')
             
         case System_State.VIEW_BUFFER_INTO_ITEM_SPECIFIC_VALUE:
             inv = app_container.inventory.get_whole_inventory()
@@ -180,14 +181,19 @@ def reaction(current_state, users_input, app_container):
                 app_container.buffer_input = new_item
                 return System_State.EDIT_ITEM_OPTIONS
             elif users_input == '3':
+                is_stattrack = user_input_item_statrack()
+                new_item = app_container.inventory.set_item_stattrack(app_container.buffer_input, is_stattrack)
+                app_container.buffer_input = new_item
+                return System_State.EDIT_ITEM_OPTIONS
+            elif users_input == '4':
                 new_item_condition = user_input_item_condition()
                 condition_str = Item.get_condition_str_from_cond(new_item_condition)
                 new_item = app_container.inventory.set_item_condition(app_container.buffer_input, condition_str)
                 app_container.buffer_input = new_item
                 return System_State.EDIT_ITEM_OPTIONS
-            elif users_input == '4':
-                pass
             elif users_input == '5':
+                pass
+            elif users_input == '6':
                 pass
         case System_State.VIEW_BUFFER_INTO_ITEM_SPECIFIC_VALUE:
             try:
@@ -301,6 +307,20 @@ def user_input_item_name():
     user_item_name = input()
     return user_item_name.title()
 
+def user_input_item_statrack():
+    print("is item stattrack?")
+    user_stattrack = None
+    while True:
+        print("Enter either y/n:")
+        temp = input().upper()
+        if temp == "Y":
+            user_stattrack = True
+            break
+        elif temp == "N":
+            user_stattrack = False
+            break
+    return user_stattrack
+
 def user_input_item_condition():
     print("enter the condition of the item (if applicable)")
     print("1. NONE\n2. BATTLE SCARRED\n3. WELL_WORN\n4. FIELD_TESTED\n5. MINIMAL_WEAR\n6. FACTORY_NEW")
@@ -337,16 +357,7 @@ def create_item(app_container):
     clear()
     user_type = user_input_item_type()
     user_item_name = user_input_item_name()
-    print("is item stattrack?")
-    while True:
-        print("Enter either y/n:")
-        temp = input().upper()
-        if temp == "Y":
-            user_stattrack = True
-            break
-        elif temp == "N":
-            user_stattrack = False
-            break
+    user_stattrack = user_input_item_statrack()
     user_condition = user_input_item_condition()
     print("please enter the price that you bought the item at ex: 42.93 , 0.03")
     while True:
