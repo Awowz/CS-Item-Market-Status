@@ -11,6 +11,19 @@ class Steam_Market_Scraper():
         self.__payload = {COUNTRY_KEY:COUNTRY_VALUE, CURRENCY_KEY:CURRENCY_VALUE, APPID_KEY:COUNTER_STRIKE_APP_ID}
         self.__search_payload = {START_KEY:START_VALUE, COUNT_KEY:COUNT_VALUE,LANGUAGE_KEY:LANGUAGE_VALUE,CURRENCY_KEY:CURRENCY_VALUE,APPID_KEY:COUNTER_STRIKE_APP_ID}
         self.__all_conditions = ["Battle-Scarred","Well-Worn", "Field-Tested", "Minimal Wear", "Factory New"]
+        self.__stored_items_for_sessions = []
+
+    def __is_item_in_session(self, item):
+        if len(self.__stored_items_for_sessions) == 0:
+            print("returning none because stored empty")
+            return None
+        for x in self.__stored_items_for_sessions:
+            print(item.construct_string())
+            print(x.construct_string())
+            if item.construct_string() == x.construct_string():
+                return x
+        return None
+        
 
     def __check_valid_listing(self, item:Item):
         print(f"Checking for item {item.construct_string()} on market...")
@@ -101,6 +114,10 @@ class Steam_Market_Scraper():
 
 
     def get_item_value(self, item:Item) ->Item:
+        previous_session = self.__is_item_in_session(item)
+        print(previous_session)
+        if previous_session != None:
+            return previous_session
         print("searching for item, putting delay on request to not overwhelm servers, please wait....")
         time.sleep(STEAM_QUERY_DELAY)
         item_price = self.__retrieve_market_value(item)
@@ -110,6 +127,7 @@ class Steam_Market_Scraper():
             print("No items found, doing general search...")
             time.sleep(STEAM_QUERY_DELAY)
             copied_item = self.__query_search_item(copied_item)
+        self.__stored_items_for_sessions.append(copied_item)
         return copied_item
 
     def test(self):
