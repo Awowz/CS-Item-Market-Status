@@ -1,7 +1,7 @@
 from inventory_lsit import *
 from steam_market_scraper import *
 import os
-#next implement edit. edit name, end user, condition, quantity, bought price, refactor code from create_item()
+#TODO implement change price in edit options
 #TODO calculate value gained from each itme, total value gained nad percentage increase for each entrie (1.00 spent 1.50 market value ->50% gain)
 #TODO when editing entry if already exisitning, then just add its history to existin item hirstory
 #TODO pull from db all into an item array, then get prices for each of them. dont throw away this data, keep it pooled so that if more request are sent in the same session its not spamming server
@@ -392,18 +392,28 @@ def create_item(app_container):
     app_container.inventory.add_item_and_history(generated_item)
 
 def get_str_item_value_output(app_container, items: list[Item]):
+    items_visited = []
     buffer = ""
-    total_spent = 0
-    total_gained = 0
+    absolute_gained = 0
+    absolute_spent = 0
     for item in items:
+        if item.construct_string() in items_visited:
+            continue
+        else:
+            items_visited.append(item.construct_string())
+        total_spent = 0
+        total_gained = 0
         item_with_history = app_container.inventory.get_accurate_items_history_from_item(item)
         item_value = app_container.scraper.get_item_value(item)
         for single_item in item_with_history:
             total_spent += single_item.bought_price * single_item.quantity
             single_item.set_market_value(item_value.market_value)
             total_gained += single_item.market_value * single_item.quantity
-            buffer += f"{TEXT_UNDERLINE}{single_item.construct_string()}{TEXT_ENDC}\n---------------------------------\nCurrent Market Value: {single_item.market_value}\nBought {single_item.quantity} at {single_item.bought_price} Each\nSpent: {single_item.get_total_spent()}\nProfit: {single_item.get_total_profit()}\n\n"
-        buffer += f"---------------------------------\n{TEXT_BOLD}Total Spent: {total_spent}\nTotal Market Value: {total_gained}\nTotal Profit: {total_gained - total_spent}{TEXT_ENDC}\n" 
+            buffer += f"{TEXT_UNDERLINE}{single_item.construct_string()}{TEXT_ENDC}\n---------------------------------\nCurrent Market Value: {single_item.market_value}\nBought {single_item.quantity} at {single_item.bought_price} Each\nSpent: {single_item.get_total_spent()}\nProfit: {single_item.get_total_profit()}\n"
+        buffer += f"---------------------------------\n{TEXT_BOLD}Sub Total Spent: {total_spent}\nSub Total Market Value: {total_gained}\nSub Total Profit: {total_gained - total_spent}{TEXT_ENDC}\n\n" 
+        absolute_spent += total_spent
+        absolute_gained += total_gained
+    buffer += f"\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\\n{TEXT_BOLD}Total Spent: {absolute_spent}\nTotal Market Value: {absolute_gained}\nTotal Profit: {absolute_gained - absolute_spent}{TEXT_ENDC}\n\n" 
     return buffer
 
 def main():
