@@ -250,6 +250,19 @@ WHERE {SQL_INVENTORY_INDEX} == '{item_id}' '''
         self.sql_connection.commit()
         return self.__convert_list_of_inv_to_item(self.get_raw_item_from_id(item_id))[0]
     
+    def set_item_owner(self, item:Item, new_owner):
+        if new_owner != None:
+            new_owner = new_owner.upper()
+        else:
+            new_owner = "."
+        item_id = self.__get_inventory_id(item)
+        query = f'''UPDATE {SQL_INVENTORY_TABLE_NAME}
+SET {SQL_INVENTORY_USERNAME} = '{new_owner}'
+WHERE {SQL_INVENTORY_INDEX} == '{item_id}' '''
+        self.sql_inventory.execute(query).fetchall()
+        self.sql_connection.commit()
+        return self.__convert_list_of_inv_to_item(self.get_raw_item_from_id(item_id))[0]
+    
     def close(self):
         self.sql_connection.close()
 

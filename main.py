@@ -192,7 +192,10 @@ def reaction(current_state, users_input, app_container):
                 app_container.buffer_input = new_item
                 return System_State.EDIT_ITEM_OPTIONS
             elif users_input == '5':
-                pass
+                new_item_owner = user_input_item_user()
+                new_item = app_container.inventory.set_item_owner(app_container.buffer_input, new_item_owner)
+                app_container.buffer_input = new_item
+                return System_State.EDIT_ITEM_OPTIONS
             elif users_input == '6':
                 pass
         case System_State.VIEW_BUFFER_INTO_ITEM_SPECIFIC_VALUE:
@@ -353,6 +356,13 @@ def user_input_item_condition():
             pass
     return user_condition
 
+def user_input_item_user():
+    print("please enter the owners name, can leave blank")
+    user_name = input()
+    if user_name == "":
+        user_name = None
+    return user_name
+
 def create_item(app_container):
     clear()
     user_type = user_input_item_type()
@@ -377,10 +387,7 @@ def create_item(app_container):
             break
         except:
             print("invalid input, please try again")
-    print("please enter the owners name, can leave blank")
-    user_name = input()
-    if user_name == "":
-        user_name = None
+    user_name = user_input_item_user()
     generated_item = Item(user_type, user_item_name, user_price, user_quantity, user_condition, user_stattrack, user_name)
     app_container.inventory.add_item_and_history(generated_item)
 
