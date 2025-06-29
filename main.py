@@ -2,6 +2,9 @@ from inventory_lsit import *
 from steam_market_scraper import *
 import os
 #todo fix stream_scraper from putting dup and items
+#todo fix formatting of display text / output text
+#todo find what happens when steam returns no results.
+#communicate that if an item isnt found / and what item its being 'replaeced' with
 #TODO implement change price in edit options
 #TODO calculate value gained from each itme, total value gained nad percentage increase for each entrie (1.00 spent 1.50 market value ->50% gain)
 #TODO when editing entry if already exisitning, then just add its history to existin item hirstory
