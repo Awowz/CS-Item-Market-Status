@@ -1,4 +1,4 @@
-# 📦 Counter Strike Item Market Status
+# 📦 Counter Strike Item Market Status 📦
 
 This project retrieves the current market value of your skins from your Counter Strike inventory and the retrieve the profits of your current assets.
 

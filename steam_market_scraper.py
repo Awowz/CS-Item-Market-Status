@@ -11,22 +11,17 @@ class Steam_Market_Scraper():
         self.__payload = {COUNTRY_KEY:COUNTRY_VALUE, CURRENCY_KEY:CURRENCY_VALUE, APPID_KEY:COUNTER_STRIKE_APP_ID}
         self.__search_payload = {START_KEY:START_VALUE, COUNT_KEY:COUNT_VALUE,LANGUAGE_KEY:LANGUAGE_VALUE,CURRENCY_KEY:CURRENCY_VALUE,APPID_KEY:COUNTER_STRIKE_APP_ID}
         self.__all_conditions = ["Battle-Scarred","Well-Worn", "Field-Tested", "Minimal Wear", "Factory New"]
-        self.__stored_items_for_sessions = []
+        self.__stored_items_for_sessions = {}
 
-    def __is_item_in_session(self, item):
-        if len(self.__stored_items_for_sessions) == 0:
-            print("returning none because stored empty")
+    def __is_item_in_session(self, item:Item):
+        if item.construct_string() not in self.__stored_items_for_sessions:
             return None
-        for x in self.__stored_items_for_sessions:
-            print(item.construct_string())
-            print(x.construct_string())
-            if item.construct_string() == x.construct_string():
-                return x
-        return None
+        suggested_item = self.__stored_items_for_sessions[item.construct_string()]
+        return suggested_item
         
 
     def __check_valid_listing(self, item:Item):
-        print(f"Checking for item {item.construct_string()} on market...")
+        print(f"Checking for item \"{item.construct_string()}\" on market...")
         payload = self.__generate_market_hash_payload(item.construct_string())
         r = requests.get(STEAM_MARKET_BASE_URL, params=payload)
         response = r.json()
@@ -105,29 +100,30 @@ class Steam_Market_Scraper():
         if item_price == None:
             print("found an error")
             raise Exception(f"No items have been found from item: {item.construct_string()}. please edit the item and correctly spell it")
-        print(f"could not find item {item.construct_string()}. search results returned: {possible_item_name}\n")
+        print(f"{TEXT_WARNING}{item.construct_string()} could not be found{TEXT_ENDC}.\nCloses search results returned: {possible_item_name}\n")
         possible_item_correction = self.__filter_out_for_name(possible_item_name)
-        item.set_item_type(possible_item_correction[0])
-        item.set_item_name(possible_item_correction[1])
-        item.set_market_value(item_price)
-        return item
+        temp_item = item
+        temp_item.set_item_type(possible_item_correction[0])
+        temp_item.set_item_name(possible_item_correction[1])
+        temp_item.set_market_value(item_price)
+        return temp_item
 
 
     def get_item_value(self, item:Item) ->Item:
         previous_session = self.__is_item_in_session(item)
-        print(previous_session)
+        old_item_name_placeholder = item.construct_string()
         if previous_session != None:
             return previous_session
-        print("searching for item, putting delay on request to not overwhelm servers, please wait....")
+        print(f"Searching for item, {item.construct_string()}...\nPutting delay on request to not overwhelm servers, please wait....")
         time.sleep(STEAM_QUERY_DELAY)
         item_price = self.__retrieve_market_value(item)
         copied_item = item
         copied_item.set_market_value(item_price)
         if item_price == None:
-            print("No items found, doing general search...")
+            print(f"{TEXT_WARNING}No items found{TEXT_ENDC}.\nDoing general table search, please wait...")
             time.sleep(STEAM_QUERY_DELAY)
             copied_item = self.__query_search_item(copied_item)
-        self.__stored_items_for_sessions.append(copied_item)
+        self.__stored_items_for_sessions[old_item_name_placeholder] = copied_item
         return copied_item
 
     def test(self):
