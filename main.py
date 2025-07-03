@@ -400,11 +400,14 @@ def get_str_item_value_output(app_container, items: list[Item]):
     buffer = ""
     absolute_gained = 0
     absolute_spent = 0
+    buffer += f"{TEXT_WARNING}Please be sure to stretch your terminal to prevent the table from wrapping{TEXT_ENDC}\n"
+    buffer += f"| {'Item':<28} | {'Market Val':>10} | {'Qty':>3} | {'Bought at':>9} | {'Spent':>9} | {'Profit':>9} |\n"
+    buffer += "-" * 86 + "\n"
     for item in items:
-        if item.construct_string() in items_visited:
-            continue
-        else:
-            items_visited.append(item.construct_string())
+        #if item.construct_string() in items_visited:
+        #    continue
+        #else:
+        #    items_visited.append(item.construct_string())
         total_spent = 0
         total_gained = 0
         item_with_history = app_container.inventory.get_accurate_items_history_from_item(item)
@@ -413,12 +416,25 @@ def get_str_item_value_output(app_container, items: list[Item]):
             total_spent += single_item.bought_price * single_item.quantity
             single_item.set_market_value(item_value.market_value)
             total_gained += single_item.market_value * single_item.quantity
-            buffer += f"{TEXT_UNDERLINE}{single_item.construct_string()}{TEXT_ENDC}\n---------------------------------\nCurrent Market Value: {single_item.market_value}\nBought {single_item.quantity} at {single_item.bought_price} Each\nSpent: {single_item.get_total_spent()}\nProfit: {single_item.get_total_profit()}\n"
-        buffer += f"---------------------------------\n{TEXT_BOLD}Sub Total Spent: {total_spent}\nSub Total Market Value: {total_gained}\nSub Total Profit: {total_gained - total_spent}{TEXT_ENDC}\n\n" 
+            text_value_color = profit_color(single_item.get_total_profit())
+            buffer += f"| {trunc_name(single_item.construct_string(), 28):<28} | {single_item.market_value:<10} | {single_item.quantity:<3d} | {single_item.bought_price:<9} | {single_item.get_total_spent():>9.4f} | {text_value_color}{single_item.get_total_profit():>9.4f}{TEXT_ENDC} |\n"
+        #buffer += f"---------------------------------\n{TEXT_BOLD}Sub Total Spent: {total_spent}\nSub Total Market Value: {total_gained}\nSub Total Profit: {total_gained - total_spent}{TEXT_ENDC}\n\n" 
         absolute_spent += total_spent
         absolute_gained += total_gained
-    buffer += f"\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\\n{TEXT_BOLD}Total Spent: {absolute_spent}\nTotal Market Value: {absolute_gained}\nTotal Profit: {absolute_gained - absolute_spent}{TEXT_ENDC}\n\n" 
+    profit = absolute_gained - absolute_spent
+    text_value_color = profit_color(profit)
+    buffer += f"\n\n{TEXT_BOLD}Total Market Value:  {absolute_gained}\n{"Total Spent:":<20} {absolute_spent:.4f}\n{"Total Profit:":<20} {text_value_color}{profit:.4f}{TEXT_ENDC}\n\n" 
     return buffer
+
+def trunc_name(name, max_length):
+    return name if len(name) <= max_length else name[:max_length - 3] + "..."
+
+def profit_color(profit):
+    if profit <= 0.00001 and profit >= -0.00001:
+        return TEXT_WARNING
+    elif profit > 0:
+        return TEXT_OKGREEN
+    return TEXT_FAIL
 
 def main():
     current_state = System_State.MAIN_MENU

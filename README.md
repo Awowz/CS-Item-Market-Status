@@ -12,6 +12,7 @@ In this application:
 ## 📱 Features
 
 - 💵 Get the current value of all your CS assets
+- 🔧 Supports multiple currencies
 - 🔗 Scraps the Steam market for the most current value of an item
 - 🔧 Items are stored in a local DB that can be added, removed, and modified.
 
