@@ -99,7 +99,7 @@ class Steam_Market_Scraper():
         item_price = self.__search_for_price(r)
         if item_price == None:
             print("found an error")
-            raise Exception(f"No items have been found from item: {item.construct_string()}. please edit the item and correctly spell it")
+            raise Exception(f"No listings have been found for item: {item.construct_string()}.\nPlease edit the item and correctly spell it, then try again...")
         print(f"{TEXT_WARNING}{item.construct_string()} could not be found{TEXT_ENDC}.\nCloses search results returned: {possible_item_name}\n")
         possible_item_correction = self.__filter_out_for_name(possible_item_name)
         temp_item = item

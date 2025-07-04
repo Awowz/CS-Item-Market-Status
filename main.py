@@ -400,14 +400,14 @@ def get_str_item_value_output(app_container, items: list[Item]):
     buffer = ""
     absolute_gained = 0
     absolute_spent = 0
-    buffer += f"{TEXT_WARNING}Please be sure to stretch your terminal to prevent the table from wrapping{TEXT_ENDC}\n"
+    buffer += f"{TEXT_WARNING}Please be sure to stretch your terminal to prevent the table from wrapping\n{TEXT_ENDC}Items labeld with ** are items that could not be found in the market likly due to spelling and have been replaved with the next closes thing\n"
     buffer += f"| {'Item':<28} | {'Market Val':>10} | {'Qty':>3} | {'Bought at':>9} | {'Spent':>9} | {'Profit':>9} |\n"
     buffer += "-" * 86 + "\n"
     for item in items:
-        #if item.construct_string() in items_visited:
-        #    continue
-        #else:
-        #    items_visited.append(item.construct_string())
+        if item.construct_string() in items_visited:
+            continue
+        else:
+            items_visited.append(item.construct_string())
         total_spent = 0
         total_gained = 0
         item_with_history = app_container.inventory.get_accurate_items_history_from_item(item)
@@ -417,14 +417,20 @@ def get_str_item_value_output(app_container, items: list[Item]):
             single_item.set_market_value(item_value.market_value)
             total_gained += single_item.market_value * single_item.quantity
             text_value_color = profit_color(single_item.get_total_profit())
-            buffer += f"| {trunc_name(single_item.construct_string(), 28):<28} | {single_item.market_value:<10} | {single_item.quantity:<3d} | {single_item.bought_price:<9} | {single_item.get_total_spent():>9.4f} | {text_value_color}{single_item.get_total_profit():>9.4f}{TEXT_ENDC} |\n"
+            identifyed_item_name = identify_item_inaccuracy(single_item.construct_string(), item_value.construct_string())
+            buffer += f"| {trunc_name(identifyed_item_name, 28):<28} | {single_item.market_value:<10} | {single_item.quantity:<3d} | {single_item.bought_price:<9} | {single_item.get_total_spent():>9.4f} | {text_value_color}{single_item.get_total_profit():>9.4f}{TEXT_ENDC} |\n"
         #buffer += f"---------------------------------\n{TEXT_BOLD}Sub Total Spent: {total_spent}\nSub Total Market Value: {total_gained}\nSub Total Profit: {total_gained - total_spent}{TEXT_ENDC}\n\n" 
         absolute_spent += total_spent
         absolute_gained += total_gained
     profit = absolute_gained - absolute_spent
     text_value_color = profit_color(profit)
-    buffer += f"\n\n{TEXT_BOLD}Total Market Value:  {absolute_gained}\n{"Total Spent:":<20} {absolute_spent:.4f}\n{"Total Profit:":<20} {text_value_color}{profit:.4f}{TEXT_ENDC}\n\n" 
+    buffer += f"\n\n{TEXT_BOLD}Total Market Value:  {absolute_gained:.4f}\n{"Total Spent:":<20} {absolute_spent:.4f}\n{"Total Profit:":<20} {text_value_color}{profit:.4f}{TEXT_ENDC}\n\n" 
     return buffer
+
+def identify_item_inaccuracy(orgin_name:str, new_name:str):
+    if orgin_name.lower() == new_name.lower():
+        return orgin_name
+    return f"**{new_name}"
 
 def trunc_name(name, max_length):
     return name if len(name) <= max_length else name[:max_length - 3] + "..."
