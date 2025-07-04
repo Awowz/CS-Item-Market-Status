@@ -1,9 +1,7 @@
 from inventory_lsit import *
 from steam_market_scraper import *
 import os
-#todo fix stream_scraper from putting dup and items
 #todo fix formatting of display text / output text
-#todo find what happens when steam returns no results.
 #communicate that if an item isnt found / and what item its being 'replaeced' with
 #TODO implement change price in edit options
 #TODO calculate value gained from each itme, total value gained nad percentage increase for each entrie (1.00 spent 1.50 market value ->50% gain)
@@ -26,6 +24,7 @@ class System_State(Enum):
     EDIT_ITEM_PROFILE_SELECT = 12
     EDIT_ITEM_SELECT = 13
     EDIT_ITEM_OPTIONS = 14
+    VIEW_BUFFER_LIST_OF_ITEMS = 15
 
 class App_Container():
     def __init__(self):
@@ -45,16 +44,15 @@ def display(current_state, users_input, app_container):
 
         case System_State.MAIN_MENU:
             print('''Options
-1. Add / Import / Export items to inventory.
+1. Add / Remove / Edit Items
 2. Inventory Item Overview
 3. Profits''')
             
         case System_State.ADD_ITEM_OVERVIEW:
             print('''Options
-1. Google sheets
-2. Add item manually
-3. Edit Item
-4. Remove Item''')
+1. Add item manually
+2. Edit Item
+3. Remove Item''')
             
         case System_State.INVENTORY_ITEM_OVERVIEW:
             print('''Options
@@ -64,10 +62,14 @@ def display(current_state, users_input, app_container):
 
         case System_State.VIEW_BUFFER_OUTPUT:
             print(app_container.buffer_output)
+
         case System_State.REMOVE_ITEM_SELECT:
             print(display_items_from_buffer(app_container))
         case System_State.EDIT_ITEM_SELECT:
             print(display_items_from_buffer(app_container))
+        case System_State.VIEW_BUFFER_LIST_OF_ITEMS:
+            print(display_items_from_buffer(app_container))
+
         case System_State.DISPLAY_USERS_INTO_INVENTORY:
             print(display_user_profiles(app_container))
         case System_State.REMOVE_ITEM_PROFILE_SELECT:
@@ -100,14 +102,12 @@ def display(current_state, users_input, app_container):
             print(buffer)
 
         case System_State.VIEW_BUFFER_WHOLE_INVENTORY:
-            items = app_container.inventory.get_whole_inventory()
-            buffer = ""
-            for x in items:
-                buffer += f"{x}\n"
+            app_container.buffer_output = app_container.inventory.get_whole_inventory()
+            buffer = display_items_no_value_from_buffer(app_container)
             print(buffer)
 
         case System_State.REMOVE_ITEM_QUATITY:
-            print(f"Enter quantity to remove of {app_container.buffer_output}")
+            print(f"Enter quantity to remove of\n{TEXT_BOLD}{app_container.buffer_output}{TEXT_ENDC}")
 
 
         case _:
@@ -117,17 +117,16 @@ def display(current_state, users_input, app_container):
 
 
 def reaction(current_state, users_input, app_container):
-    if users_input == 'q':
+    if users_input.lower() == 'q':
         app_container.inventory.close()
         exit()
-    elif users_input == 'x':
+    elif users_input.lower() == 'x':
         return System_State.MAIN_MENU
     
     match current_state:
 
         case System_State.MAIN_MENU:
             if users_input == '1':
-                print("sss")
                 return System_State.ADD_ITEM_OVERVIEW
             elif users_input == '2':
                 return System_State.INVENTORY_ITEM_OVERVIEW
@@ -136,13 +135,11 @@ def reaction(current_state, users_input, app_container):
 
         case System_State.ADD_ITEM_OVERVIEW:
             if users_input == '1':
-                pass
-            elif users_input == '2':
                 create_item(app_container)
                 return System_State.ADD_ITEM_OVERVIEW
-            elif users_input == '3':
+            elif users_input == '2':
                 return System_State.EDIT_ITEM_PROFILE_SELECT
-            elif users_input == '4':
+            elif users_input == '3':
                 return System_State.REMOVE_ITEM_PROFILE_SELECT
             
         case System_State.INVENTORY_ITEM_OVERVIEW:
@@ -164,7 +161,7 @@ def reaction(current_state, users_input, app_container):
             user_list = app_container.inventory.get_usernames_in_inventory()
             if input_int >= 0 and input_int < len(user_list):
                 app_container.buffer_output = app_container.inventory.get_users_inventory(user_list[input_int])
-                return System_State.VIEW_BUFFER_OUTPUT
+                return System_State.VIEW_BUFFER_LIST_OF_ITEMS
         
         case System_State.DISPLAY_PRICE_OPTIONS:
             if users_input == '1':
@@ -267,14 +264,20 @@ def clear():
 def display_items_from_buffer(app_container):
     buff = ""
     for x in range(len(app_container.buffer_output)):
-        buff += f"{x}: {app_container.buffer_output[x]} {app_container.buffer_output[x].bought_price}\n"
+        buff += f"{x}: {TEXT_BOLD}{app_container.buffer_output[x].construct_string()}{TEXT_ENDC} {app_container.buffer_output[x].username} - {app_container.buffer_output[x].bought_price}\n"
+    return buff
+
+def display_items_no_value_from_buffer(app_container):
+    buff = ""
+    for x in range(len(app_container.buffer_output)):
+        buff += f"{x}: {TEXT_BOLD}{app_container.buffer_output[x].construct_string()}{TEXT_ENDC} {app_container.buffer_output[x].username}\n"
     return buff
 
 def display_user_profiles(app_container):
     all_users = app_container.inventory.get_usernames_in_inventory()
     buffer = ""
     for x in range(len(all_users)):
-        buffer += f"{x}. {all_users[x]}\n"
+        buffer += f"{x}. {TEXT_BOLD}{all_users[x]}{TEXT_ENDC}\n"
     return buffer
 
 def profile_select(app_container, users_input, return_type):
