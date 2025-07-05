@@ -8,6 +8,7 @@ In this application:
 * The application will return a list of items that display a sub total of profit from each item and the current value of your inventory.
 
 --------------
+![Table Sample](/Assets/profit_table.png "Table Sample")
 
 ## 📱 Features
 
@@ -15,6 +16,7 @@ In this application:
 - 🔧 Supports multiple currencies
 - 🔗 Scraps the Steam market for the most current value of an item
 - 🔧 Items are stored in a local DB that can be added, removed, and modified.
+- 🔗 Create profiles to sort your item collection, or add your friend to the list.
 
 ## 🛠️ Installation and Dependencies
 
@@ -33,4 +35,9 @@ TODO
 ```
 📋 Usage
 
-TODO: Explain how to use the project with examples:
+This application should be straight forward to use.
+
+after opening the app with ```python3 main.py``` you can start by adding items to your inventory
+- navigate to 'Add / Remove / Edit Items'
+- Then navigate to 'Add item manually'
+- youll be prompted with a seriies of questions. youll need to provide what type of item it is, the name of the item, if the item has a condition, a price, quantity and an optional profile.

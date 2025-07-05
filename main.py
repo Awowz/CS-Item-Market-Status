@@ -1,13 +1,8 @@
 from inventory_lsit import *
 from steam_market_scraper import *
 import os
-#todo fix formatting of display text / output text
-#communicate that if an item isnt found / and what item its being 'replaeced' with
+#add my own inventory and make sure it all works.
 #TODO implement change price in edit options
-#TODO calculate value gained from each itme, total value gained nad percentage increase for each entrie (1.00 spent 1.50 market value ->50% gain)
-#TODO when editing entry if already exisitning, then just add its history to existin item hirstory
-#TODO pull from db all into an item array, then get prices for each of them. dont throw away this data, keep it pooled so that if more request are sent in the same session its not spamming server
-#TODO error catch when user doesnt provide an interger int(users_inpute)
 class System_State(Enum):
     MAIN_MENU = 0
     ADD_ITEM_OVERVIEW = 1
@@ -313,7 +308,7 @@ def user_input_item_type():
     return user_type.upper()
 
 def user_input_item_name():
-    print("Enter item name, for example: FORESTusers_input DDPAT, OPERATION BRAVO.....")
+    print("Enter item name, for example: FOREST DDPAT, OPERATION BRAVO.....")
     user_item_name = input()
     return user_item_name.title()
 
