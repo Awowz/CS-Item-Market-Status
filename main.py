@@ -57,8 +57,7 @@ def display(current_state, users_input, app_container):
         case System_State.INVENTORY_ITEM_OVERVIEW:
             print('''Options
 1. Get all items
-2. Get items from user
-3. Get Purchase history from item''')
+2. Get items from user''')
 
         case System_State.VIEW_BUFFER_OUTPUT:
             print(app_container.buffer_output)
@@ -95,10 +94,8 @@ def display(current_state, users_input, app_container):
 6. Edit Item bought at price''')
             
         case System_State.VIEW_BUFFER_INTO_ITEM_SPECIFIC_VALUE:
-            inv = app_container.inventory.get_whole_inventory()
-            buffer = ""
-            for x in range(len(inv)):
-                buffer += f"{x}: {inv[x]}\n"
+            app_container.buffer_output = app_container.inventory.get_whole_inventory()
+            buffer = display_items_no_value_from_buffer(app_container)
             print(buffer)
 
         case System_State.VIEW_BUFFER_WHOLE_INVENTORY:
@@ -147,12 +144,12 @@ def reaction(current_state, users_input, app_container):
                 return System_State.VIEW_BUFFER_WHOLE_INVENTORY
             elif users_input == '2':
                 return System_State.DISPLAY_USERS_INTO_INVENTORY
-            elif users_input == '3':
-                pass
 
         case System_State.VIEW_BUFFER_OUTPUT:
             pass
         case System_State.VIEW_BUFFER_WHOLE_INVENTORY:
+            pass
+        case System_State.VIEW_BUFFER_LIST_OF_ITEMS:
             pass
 
         case System_State.DISPLAY_USERS_INTO_INVENTORY:
@@ -165,11 +162,14 @@ def reaction(current_state, users_input, app_container):
         
         case System_State.DISPLAY_PRICE_OPTIONS:
             if users_input == '1':
-                pass
+                item_list = app_container.inventory.get_whole_inventory()
+                app_container.buffer_output = get_str_item_value_output(app_container, item_list)
+                return System_State.VIEW_BUFFER_OUTPUT
             elif users_input == '2':
                 return System_State.VIEW_BUFFER_INTO_VIEW_PLAYERS
             elif users_input == '3':
                 return System_State.VIEW_BUFFER_INTO_ITEM_SPECIFIC_VALUE
+            
         case System_State.EDIT_ITEM_OPTIONS:
             if users_input == '1':
                 new_item_type = user_input_item_type()
@@ -403,7 +403,7 @@ def get_str_item_value_output(app_container, items: list[Item]):
     buffer = ""
     absolute_gained = 0
     absolute_spent = 0
-    buffer += f"{TEXT_WARNING}Please be sure to stretch your terminal to prevent the table from wrapping\n{TEXT_ENDC}Items labeld with ** are items that could not be found in the market likly due to spelling and have been replaved with the next closes thing\n"
+    buffer += f"{TEXT_WARNING}Please be sure to stretch your terminal to prevent the table from wrapping\n{TEXT_ENDC}Items labeld with ** are items that could not be found in the market\nlikely due to spelling and have been replaced with the next closes result\n"
     buffer += f"| {'Item':<28} | {'Market Val':>10} | {'Qty':>3} | {'Bought at':>9} | {'Spent':>9} | {'Profit':>9} |\n"
     buffer += "-" * 86 + "\n"
     for item in items:
