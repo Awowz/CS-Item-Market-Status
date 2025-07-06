@@ -124,8 +124,11 @@ def reaction(current_state, users_input, app_container):
 
         case System_State.ADD_ITEM_OVERVIEW:
             if users_input == '1':
+                app_container.buffer_output = None
                 create_item(app_container)
-                return System_State.ADD_ITEM_OVERVIEW
+                if app_container.buffer_output == None:
+                    return System_State.ADD_ITEM_OVERVIEW
+                return System_State.VIEW_BUFFER_OUTPUT
             elif users_input == '2':
                 return System_State.EDIT_ITEM_PROFILE_SELECT
             elif users_input == '3':
@@ -389,6 +392,15 @@ def create_item(app_container):
     user_name = user_input_item_user()
     generated_item = Item(user_type, user_item_name, user_price, user_quantity, user_condition, user_stattrack, user_name)
     app_container.inventory.add_item_and_history(generated_item)
+    print("Would you like to see the profit for this item now?")
+    while True:
+        print("Enter either y/n:")
+        temp = input().upper()
+        if temp == "Y":
+            app_container.buffer_output = get_str_item_value_output(app_container, [generated_item])
+            break
+        elif temp == "N":
+            break
 
 def get_str_item_value_output(app_container, items: list[Item]):
     items_visited = []
