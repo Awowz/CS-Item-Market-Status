@@ -5,7 +5,6 @@ from bs4 import BeautifulSoup
 import time
 import re
 import requests
-#TODO set a time limit between item lookup and query
 class Steam_Market_Scraper():
     def __init__(self):
         self.__payload = {COUNTRY_KEY:COUNTRY_VALUE, CURRENCY_KEY:CURRENCY_VALUE, APPID_KEY:COUNTER_STRIKE_APP_ID}
@@ -131,12 +130,3 @@ class Steam_Market_Scraper():
         new_item = self.get_item_value(item)
         print(new_item.market_value)
         print(new_item.construct_string())
-
-
-        #r = requests.get('https://steamcommunity.com/market/listings/730/StatTrak%E2%84%A2%20AK-47%20%7C%20Legion%20of%20Anubis%20%28Well-Worn%29?filter=AK47&cc=us')
-        #print(r.text)
-        #print("\n\n\n")
-
-        #https://steamcommunity.com/market/priceoverview/?country=US&currency=3&appid=730&market_hash_name=AWP%20|%20Electric%20Hive%20(Factory%20New)
-
-        #https://stackoverflow.com/questions/22616644/steam-market-currency-and-xml-format

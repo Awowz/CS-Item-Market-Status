@@ -1,8 +1,6 @@
 from inventory_lsit import *
 from steam_market_scraper import *
 import os
-#add my own inventory and make sure it all works.
-#TODO implement change price in edit options
 class System_State(Enum):
     MAIN_MENU = 0
     ADD_ITEM_OVERVIEW = 1
@@ -85,8 +83,7 @@ def display(current_state, users_input, app_container):
 2. Edit Item Name
 3. Edit Stattrack Bool
 4. Edit Item Condition
-5. Edit Item's Owner
-6. Edit Item bought at price''')
+5. Edit Item's Owner''')
             
         case System_State.VIEW_BUFFER_INTO_ITEM_SPECIFIC_VALUE:
             app_container.buffer_output = app_container.inventory.get_whole_inventory()
