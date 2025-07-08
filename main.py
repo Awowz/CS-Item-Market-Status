@@ -317,17 +317,17 @@ def item_select_from_buffer(app_container, users_input, return_state):
         app_container.error = e
 
 def user_input_item_type():
-    print("Enter item type, for example: AK47, CASE, STICKER.....")
+    print("Enter an item type  |  Ex: AK47, CASE, STICKER, MP7, M249, MUSIC KIT.....")
     user_type = input()
     return user_type.upper()
 
 def user_input_item_name():
-    print("Enter item name, for example: FOREST DDPAT, OPERATION BRAVO.....")
+    print("Enter the item name  |  Ex: FOREST DDPAT, OPERATION BRAVO, SLATE, PRINTSTREAM.....")
     user_item_name = input()
     return user_item_name.title()
 
 def user_input_item_statrack():
-    print("is item stattrack?")
+    print("Is the item stattrack?")
     user_stattrack = None
     while True:
         print("Enter either y/n:")
@@ -341,7 +341,7 @@ def user_input_item_statrack():
     return user_stattrack
 
 def user_input_item_condition():
-    print("enter the condition of the item (if applicable)")
+    print("Enter the condition of the item (if applicable)")
     print("1. NONE\n2. BATTLE SCARRED\n3. WELL_WORN\n4. FIELD_TESTED\n5. MINIMAL_WEAR\n6. FACTORY_NEW")
     user_condition = None
     while True:
@@ -373,11 +373,12 @@ def user_input_item_condition():
     return user_condition
 
 def user_input_item_user():
-    print("please enter the owners name, can leave blank")
-    user_name = input()
-    if user_name == "":
-        user_name = None
-    return user_name
+    print("Please enter a profile name  |  Ex: Ant, Sticker Collection....")
+    while True:
+        user_name = input()
+        if user_name != "":
+            return user_name
+        print("Profile name cannot be left blank")
 
 def create_item(app_container):
     clear()
@@ -385,7 +386,7 @@ def create_item(app_container):
     user_item_name = user_input_item_name()
     user_stattrack = user_input_item_statrack()
     user_condition = user_input_item_condition()
-    print("please enter the price that you bought the item at ex: 42.93 , 0.03")
+    print("Please enter the price that you bought the item at  |  Ex: 1.99, 42.93 , 0.03.....")
     while True:
         try:
             user_price = input()
@@ -393,7 +394,7 @@ def create_item(app_container):
             break
         except:
             print("invalid input, please try again")
-    print("please enter the quantity of items you have bought ex: 1")
+    print("Please enter the quantity of items you have bought  |  ex: 1, 2, 37.....")
     while True:
         try:
             user_quantity = input()

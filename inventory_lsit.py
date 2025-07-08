@@ -125,7 +125,7 @@ class Inventory_List:
         {SQL_INVENTORY_STATTRACK} == {item.stattrack};'''
         buffer = self.sql_inventory.execute(query).fetchall()
         if buffer == []:
-            raise Exception("item currently does not exist in inventory.db")
+            raise Exception("New item has been established inventory.db")
         return buffer[0][0]
     
     def __search_history_from_item_id(self, id):
