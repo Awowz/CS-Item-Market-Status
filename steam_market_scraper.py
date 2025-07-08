@@ -1,10 +1,10 @@
 from constants import *
 from item import *
 from bs4 import BeautifulSoup
-
 import time
 import re
 import requests
+
 class Steam_Market_Scraper():
     def __init__(self):
         self.__payload = {COUNTRY_KEY:COUNTRY_VALUE, CURRENCY_KEY:CURRENCY_VALUE, APPID_KEY:COUNTER_STRIKE_APP_ID}

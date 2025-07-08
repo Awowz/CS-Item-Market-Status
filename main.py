@@ -56,19 +56,25 @@ def display(current_state, users_input, app_container):
             print(app_container.buffer_output)
 
         case System_State.REMOVE_ITEM_SELECT:
+            print("Please Select an item to remove:")
             print(display_items_from_buffer(app_container))
         case System_State.EDIT_ITEM_SELECT:
+            print("Please Select an item to edit:")
             print(display_items_from_buffer(app_container))
         case System_State.VIEW_BUFFER_LIST_OF_ITEMS:
             print(display_items_from_buffer(app_container))
 
         case System_State.DISPLAY_USERS_INTO_INVENTORY:
+            print("Please select a profile:")
             print(display_user_profiles(app_container))
         case System_State.REMOVE_ITEM_PROFILE_SELECT:
+            print("Please select a profile that contains the item you want to remove:")
             print(display_user_profiles(app_container))
         case System_State.VIEW_BUFFER_INTO_VIEW_PLAYERS:
+            print("Please select a profile:")
             print(display_user_profiles(app_container))
         case System_State.EDIT_ITEM_PROFILE_SELECT:
+            print("Please select a profile that contains the item you want to edit:")
             print(display_user_profiles(app_container))
 
         case System_State.DISPLAY_PRICE_OPTIONS:
@@ -88,15 +94,17 @@ def display(current_state, users_input, app_container):
         case System_State.VIEW_BUFFER_INTO_ITEM_SPECIFIC_VALUE:
             app_container.buffer_output = app_container.inventory.get_whole_inventory()
             buffer = display_items_no_value_from_buffer(app_container)
+            print("Please Select an item:")
             print(buffer)
 
         case System_State.VIEW_BUFFER_WHOLE_INVENTORY:
             app_container.buffer_output = app_container.inventory.get_whole_inventory()
             buffer = display_items_no_value_from_buffer(app_container)
+            print("Current items in inventory:")
             print(buffer)
 
         case System_State.REMOVE_ITEM_QUATITY:
-            print(f"Enter quantity to remove of\n{TEXT_BOLD}{app_container.buffer_output}{TEXT_ENDC}")
+            print(f"Please enter the quantity you want to remove of item:\n{TEXT_BOLD}{app_container.buffer_output}{TEXT_ENDC}")
 
 
         case _:
@@ -260,12 +268,16 @@ def display_items_from_buffer(app_container):
     buff = ""
     for x in range(len(app_container.buffer_output)):
         buff += f"{x}: {TEXT_BOLD}{app_container.buffer_output[x].construct_string()}{TEXT_ENDC} {app_container.buffer_output[x].username} - {app_container.buffer_output[x].bought_price}\n"
+    if buff == "":
+        return f"{TEXT_WARNING}Your Inventory is currently empty. Please add an item before continuing.{TEXT_ENDC}"
     return buff
 
 def display_items_no_value_from_buffer(app_container):
     buff = ""
     for x in range(len(app_container.buffer_output)):
         buff += f"{x}: {TEXT_BOLD}{app_container.buffer_output[x].construct_string()}{TEXT_ENDC} {app_container.buffer_output[x].username}\n"
+    if buff == "":
+        return f"{TEXT_WARNING}Your Inventory is currently empty. Please add an item before continuing.{TEXT_ENDC}"
     return buff
 
 def display_user_profiles(app_container):
@@ -273,6 +285,8 @@ def display_user_profiles(app_container):
     buffer = ""
     for x in range(len(all_users)):
         buffer += f"{x}. {TEXT_BOLD}{all_users[x]}{TEXT_ENDC}\n"
+    if buffer == "":
+        return f'{TEXT_WARNING}There are currently no profiles. Please add an item before continuing. {TEXT_ENDC}'
     return buffer
 
 def profile_select(app_container, users_input, return_type):
