@@ -12,13 +12,19 @@ class Steam_Market_Scraper():
         self.__all_conditions = ["Battle-Scarred","Well-Worn", "Field-Tested", "Minimal Wear", "Factory New"]
         self.__stored_items_for_sessions = {}
 
+    """
+    Function is for checking if requested item has already been searched and queried.
+    this function is to reduce the amount of request made to steam and speeds up application use
+    """
     def __is_item_in_session(self, item:Item):
         if item.construct_string() not in self.__stored_items_for_sessions:
             return None
         suggested_item = self.__stored_items_for_sessions[item.construct_string()]
         return suggested_item
         
-
+    """
+    function checks for item by directly inserting string into url. if there is a result, then user genereated item was correctly spelled and market value can be pulled
+    """
     def __check_valid_listing(self, item:Item):
         print(f"Checking for item \"{item.construct_string()}\" on market...")
         payload = self.__generate_market_hash_payload(item.construct_string())
@@ -31,12 +37,18 @@ class Steam_Market_Scraper():
         else:
             return None
 
+    """
+    if an item could be found from directly payloading a URL, then that item value string will need to be trimmed.
+    """
     def __retrieve_market_value(self, item:Item):
         response = self.__check_valid_listing(item)
         if response == None:
             return None
         return self.__filter_currency_to_float(response[STEAM_PRICE_KEY])
-
+    
+    """
+    Function is provided the HTML code that was pulled from a previous request and parses for the first possible item string name
+    """
     def __search_for_possible_name(self, r:requests.Response) -> str:
         soup = BeautifulSoup(r.content, 'html.parser')
         val = soup.select_one("#result_0_name")
@@ -44,21 +56,33 @@ class Steam_Market_Scraper():
             return None
         return val.text
 
+    """
+    Function is provided the HTML code that was pulled from a previous request and utilizing BS4 to parse through the text and finds the first result that contains an items sale price
+    """
     def __search_for_price(self, r:requests.Response):
         soup = BeautifulSoup(r.content, 'html.parser')
         val = soup.select_one(".sale_price")
         return self.__filter_currency_to_float(val.text)
 
+    """
+    This function constructs a url payload based off the string argument
+    """
     def __generate_market_hash_payload(self, hash:str) ->dict:
         payload = self.__payload
         payload[MARKET_HASH_KEY] = hash
         return payload
     
+    """
+    This function constructs a url payload based off the string argument
+    """
     def __generate_query_payload(self, query:str) ->dict:
         payload = self.__search_payload
         payload[QUERY_SEARCH_KEY] = query
         return payload
     
+    """
+    function takes a string thats Steams formated name for items in the community market, breaks it into pieces and returns a tuple that contians a string that represents an items type and a string that represents the items name
+    """
     def __filter_out_for_name(self, text) -> tuple: ##returns (item type, item name)
         text = text.replace(f"{STAR} ", "")
         text = text.replace(f"{STATTRACK} ", "")
@@ -75,6 +99,9 @@ class Steam_Market_Scraper():
                 return (x, item_name)
         raise Exception("item is outside of the scope of this project")
     
+    """
+    This function allows the program to support multiple currencies by using regex to ignore any non-digit character and removing puncutation
+    """
     def __filter_currency_to_float(self, string:str) ->float:
         match_str = re.search("[^\\d]*([\\d\\,\\.]+)[^\\d]*", string)
         raw = match_str.group(1)
@@ -89,6 +116,12 @@ class Steam_Market_Scraper():
             print("This currency is not suppored and could not be converted")
             return -1
 
+    """
+    This private function takes an Item class object and directly searches adds that items string as a url payload to steam.
+    if no result is found, the items string is then queried into steams community search function and returns the first result.
+    if no items were returned then item was not correctly spelled or does not exsist.
+    if an item was found, a new item object is created and returned.
+    """
     def __query_search_item(self, item:Item) -> Item:
         payload = self.__generate_query_payload(item.construct_string())
         r = requests.get(STEAM_MARKET_SEARCH_URL, params=payload)
@@ -108,6 +141,10 @@ class Steam_Market_Scraper():
         return temp_item
 
 
+    """
+    This is the main function youll call for checking for an item on the steam market.
+    takes an Item class object as a argument and will return a new item object with the resulting search result from steam along with its value.
+    """
     def get_item_value(self, item:Item) ->Item:
         previous_session = self.__is_item_in_session(item)
         old_item_name_placeholder = item.construct_string()

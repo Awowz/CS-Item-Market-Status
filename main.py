@@ -262,7 +262,10 @@ def reaction(current_state, users_input, app_container):
     return current_state
 
 def clear():
-    os.system('clr' if os.name == 'nt' else 'clear')
+    if os.name == 'nt':
+        os.system('cls')
+    else:
+        os.system('clear')
 
 def display_items_from_buffer(app_container):
     buff = ""
