@@ -2,16 +2,29 @@ from item import *
 import sqlite3
 from constants import *
 
+
+"""
+Inventory_List is a class dedicated to communicating with an sql database that contains all the necessary methods to add remove and edit items.
+there are two core sql tables: items, and purchase history.
+items and purchase history has a one to many relationship.
+
+"""
 class Inventory_List:
     def __init__(self):
         self.sql_connection = sqlite3.connect(SQL_FILE_NAME)
         self.sql_inventory = self.sql_connection.cursor()
         self.create_table()
 
+    """
+    Ensure item table and history table exsits
+    """
     def create_table(self):
         self.__create_inventory_table()
         self.__create_history_table()
-        
+    
+    """
+    Establish Item table if one doesnt currently exsist
+    """
     def __create_inventory_table(self):
         query = f"SELECT name FROM sqlite_master WHERE type='table' and name='{SQL_INVENTORY_TABLE_NAME}';"
         listOfTables = self.sql_inventory.execute(query).fetchall()
@@ -29,6 +42,9 @@ class Inventory_List:
         );'''
         self.sql_inventory.execute(query).fetchall()
 
+    """
+    Establish history table if one doesnt currently exsist
+    """
     def __create_history_table(self):
         query = f"SELECT name FROM sqlite_master WHERE type='table' and name='{SQL_PURCHASE_HISTORY_TABLE_NAME}';"
         list_of_tables = self.sql_inventory.execute(query).fetchall()
@@ -58,7 +74,7 @@ class Inventory_List:
         self.sql_inventory.execute(query)
         self.sql_connection.commit()
         
-
+    """Adds history to an item by tracking that items ID as a FOREIGN key"""
     def add_history_to_item(self, item:Item):
         item_id = self.__get_inventory_id(item)
         for x in range(item.quantity):
@@ -96,7 +112,9 @@ class Inventory_List:
                 buffer_items.append(temp)
         return buffer_items
 
-
+    """
+    Returns entire item table without history table involved
+    """
     def get_whole_inventory(self):
         query = f"SELECT * FROM {SQL_INVENTORY_TABLE_NAME}"
         buffer = self.sql_inventory.execute(query).fetchall()
@@ -128,6 +146,9 @@ class Inventory_List:
             raise Exception("New item has been established inventory.db")
         return buffer[0][0]
     
+    """
+    Returns just the history price from an item ID
+    """
     def __search_history_from_item_id(self, id):
         query = f'''SELECT {SQL_PURCHASE_HISTORY_PRICE} FROM {SQL_PURCHASE_HISTORY_TABLE_NAME}
         WHERE {SQL_PURCHASE_HISTORY_FOREIGN_INVENTORY_ID} == '{id}'
@@ -135,6 +156,9 @@ class Inventory_List:
         buffer = self.sql_inventory.execute(query).fetchall()
         return buffer
     
+    """
+    Returns History ID and price from item ID
+    """
     def __search_history_id_from_item_id(self, id):
         query = f'''SELECT {SQL_PURCHASE_HISTORY_ID}, {SQL_PURCHASE_HISTORY_PRICE} FROM {SQL_PURCHASE_HISTORY_TABLE_NAME}
         WHERE {SQL_PURCHASE_HISTORY_FOREIGN_INVENTORY_ID} == '{id}'
@@ -142,6 +166,9 @@ class Inventory_List:
         buffer = self.sql_inventory.execute(query).fetchall()
         return buffer
     
+    """
+    Returns all profile names stored inside item table
+    """
     def get_usernames_in_inventory(self) -> list[str]:
         query = f'''SELECT {SQL_INVENTORY_USERNAME} FROM {SQL_INVENTORY_TABLE_NAME} GROUP BY {SQL_INVENTORY_USERNAME}'''
         buffer = self.sql_inventory.execute(query).fetchall()
@@ -150,6 +177,9 @@ class Inventory_List:
             list_of_users.append(buffer[x][0].upper())
         return list_of_users
     
+    """
+    Returns items only owned by provided username
+    """
     def get_users_inventory(self, username:str):
         query = f"SELECT * FROM {SQL_INVENTORY_TABLE_NAME} WHERE {SQL_INVENTORY_USERNAME} == '{username}'"
         raw_items_list = self.sql_inventory.execute(query).fetchall()
@@ -164,6 +194,9 @@ class Inventory_List:
         #get sum of all entries related to item ID
         pass
 
+    """
+    returns raw SQL text related to provided item id
+    """
     def get_raw_item_from_id(self, item_id):
         query = f"SELECT * FROM {SQL_INVENTORY_TABLE_NAME} WHERE {SQL_INVENTORY_INDEX} == '{item_id}'"
         raw_item = self.sql_inventory.execute(query).fetchall()

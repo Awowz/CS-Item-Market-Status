@@ -10,7 +10,9 @@ class Condition(Enum):
     MINIMAL_WEAR = 4
     FACTORY_NEW = 5
 
-
+"""
+Item class object is a class that encapsulates core variables that make up your average item from Conter Strike.
+"""
 class Item:
     def __init__(self, type:str, name:str, bought_price:float,quanity:int=1, condition:Condition = Condition.NULL, stattrack:bool = False, username:str = ".", date:datetime = None):
         self.type = type.upper()

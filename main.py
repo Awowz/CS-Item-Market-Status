@@ -1,6 +1,7 @@
 from inventory_lsit import *
 from steam_market_scraper import *
 import os
+
 class System_State(Enum):
     MAIN_MENU = 0
     ADD_ITEM_OVERVIEW = 1
@@ -27,9 +28,10 @@ class App_Container():
         self.scraper = Steam_Market_Scraper()
         self.buffer_input = None
 
-    
-        
-
+"""
+Function exclusivly for displaying information based on the current state the application is in.
+follows a state machine model. can only be in one state at a time.
+"""
 def display(current_state, users_input, app_container):
     if app_container.error != "":
         print(f"{TEXT_WARNING}ERROR MSG:{app_container.error}{TEXT_ENDC}")
@@ -112,7 +114,10 @@ def display(current_state, users_input, app_container):
     print('q to quit    |   x back to main menu' )
         
 
-
+"""
+Function for exclusivly waiting for users input based on the current state the application is in.
+follows a state machine model. can only be in one state at a time.
+"""
 def reaction(current_state, users_input, app_container):
     if users_input.lower() == 'q':
         app_container.inventory.close()
@@ -261,28 +266,41 @@ def reaction(current_state, users_input, app_container):
         
     return current_state
 
+"""
+Clear terminal screen based on current OS
+"""
 def clear():
     if os.name == 'nt':
         os.system('cls')
     else:
         os.system('clear')
 
+"""
+Displays items in a incremental format based on the current data stored inside of app_containter buffer output
+"""
 def display_items_from_buffer(app_container):
     buff = ""
     for x in range(len(app_container.buffer_output)):
-        buff += f"{x}: {TEXT_BOLD}{app_container.buffer_output[x].construct_string()}{TEXT_ENDC} {app_container.buffer_output[x].username} - {app_container.buffer_output[x].bought_price}\n"
+        buff += f"{x}: {app_container.buffer_output[x].username:<7} | {TEXT_BOLD}{app_container.buffer_output[x].construct_string()}{TEXT_ENDC} - {app_container.buffer_output[x].bought_price}\n"
     if buff == "":
         return f"{TEXT_WARNING}Your Inventory is currently empty. Please add an item before continuing.{TEXT_ENDC}"
     return buff
 
+"""
+Displays items in a incremental format without the value of the item.
+based on the current data stored inside of app_containter buffer output
+"""
 def display_items_no_value_from_buffer(app_container):
     buff = ""
     for x in range(len(app_container.buffer_output)):
-        buff += f"{x}: {TEXT_BOLD}{app_container.buffer_output[x].construct_string()}{TEXT_ENDC} {app_container.buffer_output[x].username}\n"
+        buff += f"{x}: {app_container.buffer_output[x].username:<7} | {TEXT_BOLD}{app_container.buffer_output[x].construct_string()}{TEXT_ENDC}\n"
     if buff == "":
         return f"{TEXT_WARNING}Your Inventory is currently empty. Please add an item before continuing.{TEXT_ENDC}"
     return buff
 
+"""
+Displays all current profiles stored in app_container buffer output
+"""
 def display_user_profiles(app_container):
     all_users = app_container.inventory.get_usernames_in_inventory()
     buffer = ""
@@ -292,6 +310,10 @@ def display_user_profiles(app_container):
         return f'{TEXT_WARNING}There are currently no profiles. Please add an item before continuing. {TEXT_ENDC}'
     return buffer
 
+
+"""
+directly tied with display_user_profiles(). waits for user input to select a profile
+"""
 def profile_select(app_container, users_input, return_type):
     app_container.buffer_input = None
     try:
@@ -306,6 +328,9 @@ def profile_select(app_container, users_input, return_type):
     except Exception as e:
             app_container.error = e
 
+"""
+directly coupled with display_items_from_buffer(). allows user to select an item based off displayed items from app_container buffer output
+"""
 def item_select_from_buffer(app_container, users_input, return_state):
     try:
         input_int = int(users_input)
@@ -383,6 +408,9 @@ def user_input_item_user():
             return user_name
         print("Profile name cannot be left blank")
 
+"""
+user input based function. request user input serveral times to get neccesary information to create an item for storing in our local DB
+"""
 def create_item(app_container):
     clear()
     user_type = user_input_item_type()
@@ -420,13 +448,16 @@ def create_item(app_container):
         elif temp == "N":
             break
 
+"""
+Prepare making a table to display items and their value. goes through each item provided as an argument and uses our Steam_market_scraper to fish for those prices
+"""
 def get_str_item_value_output(app_container, items: list[Item]):
     items_visited = []
     buffer = ""
     absolute_gained = 0
     absolute_spent = 0
-    buffer += f"{TEXT_WARNING}Please be sure to stretch your terminal to prevent the table from wrapping\n{TEXT_ENDC}Items labeld with ** are items that could not be found in the market\nlikely due to spelling and have been replaced with the next closes result\n"
-    buffer += f"| {'Item':<28} | {'Market Val':>10} | {'Qty':>3} | {'Bought at':>9} | {'Spent':>9} | {'Profit':>9} |\n"
+    buffer += f"{TEXT_WARNING}Please be sure to stretch your terminal to prevent the table from wrapping.\n{TEXT_ENDC}Items labeld with ** are items that could not be found in the market -\nlikely due to spelling and have been replaced with the next closes result\n\n"
+    buffer += f'| {'Item':<28} | {'Market Val':>10} | {'Qty':>3} | {'Bought at':>9} | {'Spent':>9} | {'Profit':>9} |\n'
     buffer += "-" * 86 + "\n"
     for item in items:
         if item.construct_string() in items_visited:
@@ -443,23 +474,33 @@ def get_str_item_value_output(app_container, items: list[Item]):
             total_gained += single_item.market_value * single_item.quantity
             text_value_color = profit_color(single_item.get_total_profit())
             identifyed_item_name = identify_item_inaccuracy(single_item.construct_string(), item_value.construct_string())
-            buffer += f"| {trunc_name(identifyed_item_name, 28):<28} | {single_item.market_value:<10} | {single_item.quantity:<3d} | {single_item.bought_price:<9} | {single_item.get_total_spent():>9.4f} | {text_value_color}{single_item.get_total_profit():>9.4f}{TEXT_ENDC} |\n"
+            buffer += f'| {trunc_name(identifyed_item_name, 28):<28} | {single_item.market_value:<10} | {single_item.quantity:<3d} | {single_item.bought_price:<9} | {single_item.get_total_spent():>9.4f} | {text_value_color}{single_item.get_total_profit():>9.4f}{TEXT_ENDC} |\n'
         #buffer += f"---------------------------------\n{TEXT_BOLD}Sub Total Spent: {total_spent}\nSub Total Market Value: {total_gained}\nSub Total Profit: {total_gained - total_spent}{TEXT_ENDC}\n\n" 
         absolute_spent += total_spent
         absolute_gained += total_gained
     profit = absolute_gained - absolute_spent
     text_value_color = profit_color(profit)
-    buffer += f"\n\n{TEXT_BOLD}Total Market Value:  {absolute_gained:.4f}\n{"Total Spent:":<20} {absolute_spent:.4f}\n{"Total Profit:":<20} {text_value_color}{profit:.4f}{TEXT_ENDC}\n\n" 
+    buffer += f'\n\n{TEXT_BOLD}Total Market Value:  {absolute_gained:.4f}\n{"Total Spent:":<20} {absolute_spent:.4f}\n{"Total Profit:":<20} {text_value_color}{profit:.4f}{TEXT_ENDC}\n\n'
     return buffer
 
+"""
+Items created by user and items that are pulled from steam will potentialy differ in text.
+this function will add ** to the start of the text to identify items that differ from users expected item
+"""
 def identify_item_inaccuracy(orgin_name:str, new_name:str):
     if orgin_name.lower() == new_name.lower():
         return orgin_name
     return f"**{new_name}"
 
+"""
+ensures item string length wont exceed max length
+"""
 def trunc_name(name, max_length):
     return name if len(name) <= max_length else name[:max_length - 3] + "..."
 
+"""
+returns colored text based off profit
+"""
 def profit_color(profit):
     if profit <= 0.00001 and profit >= -0.00001:
         return TEXT_WARNING
@@ -467,6 +508,9 @@ def profit_color(profit):
         return TEXT_OKGREEN
     return TEXT_FAIL
 
+"""
+follows a traditional game loop, generate display -> take users input -> repeat
+"""
 def main():
     current_state = System_State.MAIN_MENU
     users_input = ""

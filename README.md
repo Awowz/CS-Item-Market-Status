@@ -3,7 +3,7 @@
 This project retrieves the current market value of your skins from your Counter Strike inventory and the retrieve the profits of your current assets.
 
 In this application:
-* Users will manualy input their items and the amount it was purchased for into a database.
+* Users will input their items and the amount it was purchased for into a database.
 * The application will scrap the current steam market for each items current market value.
 * The application will return a list of items that display a sub total of profit from each item and the current value of your inventory.
 * all items are saved into a local database for future investment check in.
@@ -51,6 +51,8 @@ Application is now ready to run with ```python3 main.py```
 
 This application should be straight forward to use.
 
+Most of your navigating will be done by type either 1, 2 or 3 and pressing enter.
+
 after opening the app with ```python3 main.py``` you can start by adding items to your inventory
 - navigate to 'Add / Remove / Edit Items'
 - Then navigate to 'Add item manually'
@@ -60,10 +62,11 @@ After adding whatever amount of items you desire, you can go back to the main me
 
 Now that you have items in your inventory, you can check their live value
 - navigate to 'Profits'
-- Select your desired option of displaying all items, profile items, or single item
+- Select your desired option. either display all items, profile items, or single item.
 - a table will be generated, be sure to stretch out your console window if its warped.
 
 
 ## 🛠️ Modifications
 
-* currency can be changed from USD to anyother currency. change ```COUNTRY_VALUE``` and ```CURRENCY_VALUE``` to the correct correspoding values that allign with steam api guidlines. USD = 1, EUR = 3 ...
+* Currency can be changed from USD to anyother currency. change ```COUNTRY_VALUE``` and ```CURRENCY_VALUE``` to the correct correspoding values that allign with steam api guidlines. USD = 1, EUR = 3 ...
+* You can change how long the delay is for the steam market. Warning, changing the delay per request shorter than 15 seconds you risk getting ip banned from thier service as per their TOS. value can be changed in ```constants.py``` under value ```STEAM_QUERY_DELAY```
