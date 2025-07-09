@@ -43,7 +43,7 @@ cd CS-Item-Market-Status
 # Install Dependencies
 pip install -r requirements.txt
 ```
-Application is now ready to run with ```python3 main.py```
+Application is now ready to run with ```python3 main.py``` for linux or ```python main.py``` for windows
 
 --------------
 
@@ -53,7 +53,7 @@ This application should be straight forward to use.
 
 Most of your navigating will be done by type either 1, 2 or 3 and pressing enter.
 
-after opening the app with ```python3 main.py``` you can start by adding items to your inventory
+after opening the app with ```python3 main.py``` (or ```python main.py``` for windows) you can start by adding items to your inventory
 - navigate to 'Add / Remove / Edit Items'
 - Then navigate to 'Add item manually'
 - youll be prompted with a seriies of questions. youll need to provide what type of item it is, the name of the item, if the item has a condition, a price, quantity and an optional profile name.
@@ -69,4 +69,4 @@ Now that you have items in your inventory, you can check their live value
 ## 🛠️ Modifications
 
 * Currency can be changed from USD to anyother currency. change ```COUNTRY_VALUE``` and ```CURRENCY_VALUE``` to the correct correspoding values that allign with steam api guidlines. USD = 1, EUR = 3 ...
-* You can change how long the delay is for the steam market. Warning, changing the delay per request shorter than 15 seconds you risk getting ip banned from thier service as per their TOS. value can be changed in ```constants.py``` under value ```STEAM_QUERY_DELAY```
+* You can change how long the delay is for the steam market. Warning, changing the delay per request shorter than 15 seconds you risk getting ip banned from thier service as per their TOS. value can be changed in ```constants.py``` under value ```STEAM_QUERY_DELAY```.
